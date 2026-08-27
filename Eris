@@ -1,14 +1,85 @@
-index.html
-<!DOCTYPE html>
+index.html<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eris</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #12001f;
+            color: white;
+            text-align: center;
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            font-size: 50px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 18px;
+        }
+
+        .chat {
+            max-width: 600px;
+            margin: 30px auto;
+            padding: 20px;
+            background: #210038;
+            border-radius: 20px;
+        }
+
+        #mensaje {
+            width: 80%;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            margin-top: 15px;
+        }
+
+        button {
+            padding: 12px 18px;
+            margin-left: 5px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 
 <body>
-    <h1>Hola, soy Eris 🟣</h1>
-    <p>Esta es mi primera versión.</p>
+
+    <h1>Eris 🟣</h1>
+
+    <p>Tu asistente personal</p>
+
+    <div class="chat">
+        <p id="respuesta">Hola. Soy Eris. Esta es nuestra primera versión.</p>
+
+        <input id="mensaje" type="text" placeholder="Escribe algo...">
+
+        <button onclick="hablar()">Enviar</button>
+    </div>
+
+    <script>
+        function hablar() {
+            const mensaje = document.getElementById("mensaje").value;
+            const respuesta = document.getElementById("respuesta");
+
+            if (mensaje.trim() === "") {
+                respuesta.textContent = "Escribe algo para hablar conmigo.";
+                return;
+            }
+
+            respuesta.textContent =
+                "Eris: Recibí tu mensaje: " + mensaje;
+
+            document.getElementById("mensaje").value = "";
+        }
+    </script>
+
 </body>
 </html>
