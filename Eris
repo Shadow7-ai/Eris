@@ -26,6 +26,7 @@
     .status{font-size:.85rem;opacity:.8}
     .chip{padding:6px 8px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.04)}
     @media(max-width:640px){.app{margin:8px;height:95vh}.controls{flex-direction:column;align-items:flex-end}.header h1{font-size:1.2rem}}
+    .api-status{font-size:.8rem;color:#ddd;margin-left:8px}
   </style>
 </head>
 <body>
@@ -44,6 +45,8 @@
         </div>
         <div style="display:flex;gap:8px;align-items:center;margin-left:8px">
           <button id="toggleAI" class="btn ghost">🤖 AI: OFF</button>
+          <button id="btnConfigApi" class="btn ghost">⚙️ Config API</button>
+          <span id="apiKeyStatus" class="api-status">API: no configurada</span>
           <button id="toggleListen" class="btn ghost">🎙️ Escuchar</button>
           <button id="btnClear" class="btn ghost">🗑️ Limpiar</button>
           <button id="btnExport" class="btn">⬇️ Export</button>
@@ -97,6 +100,8 @@
     const toggleVoice = document.getElementById('toggleVoice');
     const toggleListen = document.getElementById('toggleListen');
     const toggleAI = document.getElementById('toggleAI');
+    const btnConfigApi = document.getElementById('btnConfigApi');
+    const apiKeyStatus = document.getElementById('apiKeyStatus');
 
     // Initialization
     window.addEventListener('DOMContentLoaded', () => {
@@ -104,6 +109,7 @@
       setupTTS();
       renderVoiceToggle();
       renderAIToggle();
+      renderApiKeyStatus();
       setupEvents();
       setupSTT();
     });
@@ -116,8 +122,9 @@
       btnImport.addEventListener('click', ()=>importFile.click());
       importFile.addEventListener('change', handleImportFile);
       toggleVoice.addEventListener('click', ()=>{ voiceEnabled = !voiceEnabled; localStorage.setItem('eris_voice_enabled', JSON.stringify(voiceEnabled)); renderVoiceToggle(); });
-      toggleAI.addEventListener('click', ()=>{ useExternalAI = !useExternalAI; localStorage.setItem('eris_use_external_ai', JSON.stringify(useExternalAI)); renderAIToggle(); });
+      toggleAI.addEventListener('click', ()=>{ useExternalAI = !useExternalAI; localStorage.setItem('eris_use_external_ai', JSON.stringify(useExternalAI)); renderAIToggle(); checkApiKeyOnAI(); });
       toggleListen.addEventListener('click', toggleListening);
+      btnConfigApi.addEventListener('click', configureApiKey);
       window.addEventListener('beforeunload', ()=>{ saveToStorage(); });
     }
 
@@ -262,12 +269,18 @@
       recent.forEach(h=>{ msgs.push({role: h.role==='user'?'user':'assistant', content: h.text}); });
       msgs.push({role:'user', content: userText});
 
+      // get API key from localStorage
+      const apiKey = localStorage.getItem('eris_server_api_key') || '';
+      if(!apiKey) {
+        return 'La IA externa requiere una API key del proxy. Pulsa "Config API" en la cabecera para configurarla.';
+      }
+
       try{
         const controller = new AbortController();
         const timeout = setTimeout(()=>controller.abort(), 20000);
         const res = await fetch('/api/ai', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'X-API-KEY': apiKey },
           body: JSON.stringify({ messages: msgs, max_tokens: 700 }),
           signal: controller.signal
         });
@@ -278,6 +291,25 @@
         return reply;
       }catch(err){ console.error('callExternalAI', err); return 'Lo siento — no pude conectarme al servicio de IA externa. Revisa tu servidor proxy.'; }
     }
+
+    // --- API key configuration UI ---
+    function configureApiKey(){
+      const prev = localStorage.getItem('eris_server_api_key') || '';
+      const k = prompt('Pega la API key del proxy (se guardará localmente en este navegador):', prev);
+      if(k===null) return; // cancel
+      if(k.trim()===''){
+        localStorage.removeItem('eris_server_api_key');
+        alert('API key eliminada.');
+      } else {
+        localStorage.setItem('eris_server_api_key', k.trim());
+        alert('API key guardada localmente (no segura para producción).');
+      }
+      renderApiKeyStatus();
+    }
+
+    function renderApiKeyStatus(){ const k = localStorage.getItem('eris_server_api_key'); apiKeyStatus.textContent = k? 'API: configurada' : 'API: no configurada'; }
+
+    function checkApiKeyOnAI(){ if(useExternalAI){ const k = localStorage.getItem('eris_server_api_key'); if(!k){ setTimeout(()=>{ if(confirm('La IA externa requiere una API key del proxy. ¿Quieres configurarla ahora?')) configureApiKey(); }, 100); } } }
 
     // --- Utilities ---
     function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
