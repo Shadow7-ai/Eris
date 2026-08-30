@@ -3,134 +3,480 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Eris</title>
+  <title>Eris - IA Personal Avanzada</title>
 
   <style>
-    body {
+    * {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: #171021;
-      color: white;
-      text-align: center;
+      padding: 0;
+      box-sizing: border-box;
     }
 
-    .app {
-      max-width: 600px;
-      margin: 50px auto;
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0f0c1e 0%, #171021 50%, #2a1a3f 100%);
+      color: #e0e0e0;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
       padding: 20px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+      animation: fadeIn 0.8s ease;
     }
 
     h1 {
       color: #b46cff;
+      font-size: 2.5em;
+      text-shadow: 0 0 20px rgba(180, 108, 255, 0.5);
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      color: #888;
+      font-size: 0.9em;
+    }
+
+    .app {
+      display: flex;
+      flex-direction: column;
+      max-width: 700px;
+      margin: 0 auto;
+      width: 100%;
+      height: 100%;
+      background: rgba(36, 23, 53, 0.8);
+      border-radius: 20px;
+      border: 2px solid rgba(180, 108, 255, 0.2);
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
     }
 
     #chat {
-      height: 400px;
+      flex: 1;
       overflow-y: auto;
-      background: #241735;
-      padding: 15px;
-      border-radius: 15px;
-      text-align: left;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
 
-    .mensaje {
-      padding: 10px;
-      margin: 10px 0;
+    #chat::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    #chat::-webkit-scrollbar-track {
+      background: rgba(100, 50, 150, 0.1);
       border-radius: 10px;
     }
 
+    #chat::-webkit-scrollbar-thumb {
+      background: rgba(180, 108, 255, 0.4);
+      border-radius: 10px;
+    }
+
+    #chat::-webkit-scrollbar-thumb:hover {
+      background: rgba(180, 108, 255, 0.6);
+    }
+
+    .mensaje {
+      padding: 12px 16px;
+      border-radius: 12px;
+      max-width: 80%;
+      word-wrap: break-word;
+      animation: slideIn 0.3s ease;
+    }
+
     .eris {
-      background: #382449;
+      background: linear-gradient(135deg, #382449 0%, #4a3560 100%);
+      align-self: flex-start;
+      border-left: 3px solid #b46cff;
     }
 
     .usuario {
-      background: #6535a3;
-      text-align: right;
+      background: linear-gradient(135deg, #6535a3 0%, #7d4db8 100%);
+      align-self: flex-end;
+      border-right: 3px solid #b46cff;
+    }
+
+    .writing-indicator {
+      display: flex;
+      gap: 4px;
+      padding: 12px 16px;
+      background: linear-gradient(135deg, #382449 0%, #4a3560 100%);
+      border-radius: 12px;
+      width: fit-content;
+      align-self: flex-start;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #b46cff;
+      animation: bounce 1.4s infinite;
+    }
+
+    .dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes bounce {
+      0%, 60%, 100% { opacity: 0.3; }
+      30% { opacity: 1; }
     }
 
     .entrada {
       display: flex;
-      margin-top: 15px;
       gap: 10px;
+      padding: 15px 20px;
+      background: rgba(30, 20, 40, 0.9);
+      border-top: 1px solid rgba(180, 108, 255, 0.2);
     }
 
     input {
       flex: 1;
-      padding: 12px;
+      padding: 12px 16px;
       border-radius: 10px;
-      border: none;
+      border: 2px solid rgba(180, 108, 255, 0.3);
+      background: rgba(50, 35, 70, 0.8);
+      color: #e0e0e0;
+      font-size: 1em;
+      transition: all 0.3s ease;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #b46cff;
+      box-shadow: 0 0 10px rgba(180, 108, 255, 0.3);
+    }
+
+    input::placeholder {
+      color: #666;
     }
 
     button {
-      padding: 12px;
+      padding: 12px 24px;
       border: none;
       border-radius: 10px;
+      background: linear-gradient(135deg, #b46cff 0%, #8b3fb8 100%);
+      color: white;
       cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(180, 108, 255, 0.3);
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(180, 108, 255, 0.5);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      padding: 10px 20px;
+      background: rgba(30, 20, 40, 0.9);
+      border-top: 1px solid rgba(180, 108, 255, 0.2);
+      font-size: 0.85em;
+    }
+
+    .control-btn {
+      padding: 6px 12px;
+      border: 1px solid rgba(180, 108, 255, 0.5);
+      background: rgba(180, 108, 255, 0.1);
+      color: #b46cff;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      font-size: 0.9em;
+    }
+
+    .control-btn:hover {
+      background: rgba(180, 108, 255, 0.2);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.8em;
+      }
+
+      .mensaje {
+        max-width: 90%;
+      }
+
+      .controls {
+        flex-wrap: wrap;
+      }
     }
   </style>
 </head>
 
 <body>
 
-  <div class="app">
+  <div class="container">
+    <div class="header">
+      <h1>🌙 Eris</h1>
+      <p class="subtitle">Tu asistente de IA personal</p>
+    </div>
 
-    <h1>🌙 Eris</h1>
+    <div class="app">
+      <div id="chat">
+        <div class="mensaje eris">
+          👋 ¡Hola! Soy Eris, tu asistente personal de IA. Estoy aquí para ayudarte con cualquier cosa. Prueba escribiendo "ayuda" para ver lo que puedo hacer.
+        </div>
+      </div>
 
-    <div id="chat">
-      <div class="mensaje eris">
-        Hola 👋 Soy Eris. Estoy lista para comenzar.
+      <div class="controls">
+        <button class="control-btn" onclick="limpiarChat()">🗑️ Limpiar</button>
+        <button class="control-btn" onclick="mostrarAyuda()">❓ Ayuda</button>
+        <button class="control-btn" onclick="guardarChat()">💾 Guardar</button>
+      </div>
+
+      <div class="entrada">
+        <input id="mensaje" placeholder="Escribe algo..." onkeypress="if(event.key==='Enter') enviar()">
+        <button onclick="enviar()">Enviar</button>
       </div>
     </div>
-
-    <div class="entrada">
-      <input id="mensaje" placeholder="Escribe algo...">
-      <button onclick="enviar()">Enviar</button>
-    </div>
-
   </div>
 
   <script>
+    // Base de conocimiento expandida
+    const conocimiento = {
+      saludos: {
+        patrones: ["hola", "hey", "buenos días", "buenas noches", "qué tal"],
+        respuestas: [
+          "¡Hola! 😄 ¿En qué puedo ayudarte?",
+          "¡Hola! Me alegra verte de nuevo.",
+          "Hola 👋 ¿Cómo estás?"
+        ]
+      },
+      identidad: {
+        patrones: ["quién eres", "cuál es tu nombre", "tu nombre", "presentate"],
+        respuestas: [
+          "Soy Eris, tu asistente personal de IA creado por Shadow7-ai. 🌙",
+          "Me llamo Eris y soy tu proyecto de IA personal."
+        ]
+      },
+      estado: {
+        patrones: ["cómo estás", "como estas", "qué tal", "cómo te va"],
+        respuestas: [
+          "¡Funcionando perfectamente! Gracias por preguntar. 💜",
+          "Estoy operativo y listo para ayudarte.",
+          "¡Excelente! Gracias por preguntar."
+        ]
+      },
+      gratitud: {
+        patrones: ["gracias", "muchas gracias", "thanks", "merci"],
+        respuestas: [
+          "¡De nada! 😊",
+          "Es un placer ayudarte.",
+          "Para eso estamos. 💜"
+        ]
+      },
+      despedida: {
+        patrones: ["adiós", "hasta luego", "bye", "nos vemos", "chao"],
+        respuestas: [
+          "¡Hasta pronto! Que tengas un excelente día. 👋",
+          "¡Adiós! Vuelve cuando necesites ayuda.",
+          "¡Nos vemos! 🌙"
+        ]
+      },
+      ayuda: {
+        patrones: ["ayuda", "help", "qué puedes hacer", "funciones"],
+        respuestas: [
+          "Puedo ayudarte con:\n• Responder preguntas\n• Mantener conversaciones\n• Contar historias\n• Dar consejos\n• ¡Y mucho más!\n\nIntenta escribiendo: 'cuéntame una historia' o 'dame un consejo'"
+        ]
+      },
+      tiempo: {
+        patrones: ["qué hora es", "hora", "la hora"],
+        respuestas: () => {
+          const hora = new Date().toLocaleTimeString('es-ES', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            second: '2-digit'
+          });
+          return `La hora actual es: ${hora} ⏰`;
+        }
+      },
+      fecha: {
+        patrones: ["qué fecha es", "la fecha", "fecha de hoy"],
+        respuestas: () => {
+          const fecha = new Date().toLocaleDateString('es-ES', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          });
+          return `Hoy es ${fecha} 📅`;
+        }
+      },
+      chistes: {
+        patrones: ["cuéntame un chiste", "un chiste", "hazme reír"],
+        respuestas: [
+          "¿Por qué los programadores nunca se pierden? Porque siguen el flujo del código. 😄",
+          "¿Qué es un bebé ordenador? Un micro-chip. 💻",
+          "¿Por qué JavaScript es como una rueda? Porque siempre está rodando por todas partes. 🎡"
+        ]
+      },
+      motivacion: {
+        patrones: ["motivación", "dame motivación", "estoy triste", "necesito ánimo"],
+        respuestas: [
+          "¡Tú puedes! Cada día es una nueva oportunidad. 💪",
+          "Recuerda que los pequeños pasos siguen siendo progreso. Sigue adelante. 🌟",
+          "Eres más fuerte de lo que crees. No te rindas. 💜"
+        ]
+      }
+    };
+
+    // Historial de chat
+    let historial = cargarHistorial();
+
     function enviar() {
       const input = document.getElementById("mensaje");
       const chat = document.getElementById("chat");
-
       const texto = input.value.trim();
 
       if (texto === "") return;
 
-      chat.innerHTML +=
-        '<div class="mensaje usuario">' + texto + '</div>';
+      // Agregar mensaje del usuario
+      agregarMensaje(texto, "usuario");
+      historial.push({ tipo: "usuario", texto: texto });
 
-      let respuesta = responder(texto);
+      // Mostrar indicador de escritura
+      mostrarIndicadorEscritura();
 
-      chat.innerHTML +=
-        '<div class="mensaje eris">' + respuesta + '</div>';
+      // Simular latencia de procesamiento
+      setTimeout(() => {
+        const respuesta = responder(texto);
+        eliminarIndicadorEscritura();
+        agregarMensaje(respuesta, "eris");
+        historial.push({ tipo: "eris", texto: respuesta });
+      }, 500 + Math.random() * 1000);
 
       input.value = "";
       chat.scrollTop = chat.scrollHeight;
     }
 
     function responder(texto) {
-      texto = texto.toLowerCase();
+      texto = texto.toLowerCase().trim();
 
-      if (texto.includes("hola")) {
-        return "Hola 😄. Soy Eris.";
+      // Buscar en la base de conocimiento
+      for (const categoria in conocimiento) {
+        const datos = conocimiento[categoria];
+        for (const patron of datos.patrones) {
+          if (texto.includes(patron)) {
+            const respuesta = datos.respuestas;
+            if (typeof respuesta === "function") {
+              return respuesta();
+            }
+            return respuesta[Math.floor(Math.random() * respuesta.length)];
+          }
+        }
       }
 
-      if (texto.includes("quien eres")) {
-        return "Soy Eris, tu proyecto personal de IA.";
-      }
-
-      if (texto.includes("cómo estás") || texto.includes("como estas")) {
-        return "Estoy funcionando correctamente.";
-      }
-
-      if (texto.includes("gracias")) {
-        return "De nada 😄.";
-      }
-
-      return "Todavía estoy aprendiendo. Podemos mejorarme poco a poco.";
+      // Respuesta por defecto
+      const respuestasDefault = [
+        "Esa es una pregunta interesante. Aún estoy aprendiendo sobre ese tema. 🤔",
+        "Hmm, déjame procesarlo... Podemos mejorar mi conocimiento juntos.",
+        "No estoy segura sobre eso, pero podemos investigar juntos.",
+        "Interesante pregunta. ¿Me das más detalles para poder ayudarte mejor?"
+      ];
+      return respuestasDefault[Math.floor(Math.random() * respuestasDefault.length)];
     }
+
+    function agregarMensaje(texto, tipo) {
+      const chat = document.getElementById("chat");
+      const div = document.createElement("div");
+      div.className = `mensaje ${tipo}`;
+      div.textContent = texto;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function mostrarIndicadorEscritura() {
+      const chat = document.getElementById("chat");
+      const div = document.createElement("div");
+      div.className = "writing-indicator";
+      div.id = "writing-indicator";
+      div.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function eliminarIndicadorEscritura() {
+      const indicator = document.getElementById("writing-indicator");
+      if (indicator) indicator.remove();
+    }
+
+    function limpiarChat() {
+      if (confirm("¿Estás seguro que deseas limpiar el chat?")) {
+        document.getElementById("chat").innerHTML = 
+          '<div class="mensaje eris">Chat limpiado. ¿En qué puedo ayudarte? 🌙</div>';
+        historial = [];
+      }
+    }
+
+    function mostrarAyuda() {
+      const ayuda = responder("ayuda");
+      agregarMensaje(ayuda, "eris");
+      historial.push({ tipo: "eris", texto: ayuda });
+    }
+
+    function guardarChat() {
+      localStorage.setItem("eris_chat_historial", JSON.stringify(historial));
+      agregarMensaje("Chat guardado exitosamente en tu navegador. 💾", "eris");
+    }
+
+    function cargarHistorial() {
+      const guardado = localStorage.getItem("eris_chat_historial");
+      if (guardado) {
+        const hist = JSON.parse(guardado);
+        hist.forEach(msg => {
+          agregarMensaje(msg.texto, msg.tipo);
+        });
+        return hist;
+      }
+      return [];
+    }
+
+    // Cargar historial al iniciar
+    window.addEventListener("load", () => {
+      const chat = document.getElementById("chat");
+      chat.scrollTop = chat.scrollHeight;
+    });
   </script>
 
 </body>
