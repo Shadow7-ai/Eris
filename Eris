@@ -20,7 +20,7 @@
     }
 
     .app {
-      max-width: 700px;
+      max-width: 800px;
       margin: 30px auto;
       padding: 20px;
       display: flex;
@@ -34,6 +34,7 @@
       align-items: center;
       margin-bottom: 20px;
       padding: 10px;
+      gap: 10px;
     }
 
     h1 {
@@ -43,11 +44,17 @@
       text-shadow: 0 0 20px rgba(180, 108, 255, 0.5);
     }
 
+    .controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
     .btn-limpiar {
       background: #e74c3c;
       color: white;
       border: none;
-      padding: 8px 16px;
+      padding: 8px 12px;
       border-radius: 8px;
       cursor: pointer;
       font-size: 0.9rem;
@@ -56,18 +63,33 @@
 
     .btn-limpiar:hover {
       background: #c0392b;
-      transform: scale(1.05);
+      transform: scale(1.03);
+    }
+
+    .voice-toggle {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(180,108,255,0.12);
+      padding: 8px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .voice-toggle.active {
+      background: linear-gradient(135deg, #b46cff 0%, #7d4fb8 100%);
+      color: white;
+      box-shadow: 0 6px 20px rgba(180,108,255,0.25);
     }
 
     #chat {
       flex: 1;
       overflow-y: auto;
-      background: rgba(36, 23, 53, 0.8);
+      background: rgba(36, 23, 53, 0.85);
       padding: 20px;
       border-radius: 15px;
       text-align: left;
       margin-bottom: 15px;
-      border: 2px solid rgba(180, 108, 255, 0.2);
+      border: 2px solid rgba(180, 108, 255, 0.18);
       scroll-behavior: smooth;
     }
 
@@ -76,7 +98,7 @@
     }
 
     #chat::-webkit-scrollbar-track {
-      background: rgba(180, 108, 255, 0.1);
+      background: rgba(180, 108, 255, 0.06);
       border-radius: 10px;
     }
 
@@ -92,6 +114,7 @@
       animation: fadeIn 0.3s ease;
       max-width: 85%;
       word-wrap: break-word;
+      line-height: 1.4;
     }
 
     @keyframes fadeIn {
@@ -109,6 +132,7 @@
       background: linear-gradient(135deg, #382449 0%, #4a2d5c 100%);
       align-self: flex-start;
       border-left: 3px solid #b46cff;
+      color: #fff;
     }
 
     .usuario {
@@ -121,10 +145,10 @@
     .typing {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 8px;
     }
 
-    .typing span {
+    .typing span.dot {
       width: 8px;
       height: 8px;
       background: #b46cff;
@@ -132,11 +156,11 @@
       animation: typing 1.4s infinite;
     }
 
-    .typing span:nth-child(2) {
+    .typing span.dot:nth-child(2) {
       animation-delay: 0.2s;
     }
 
-    .typing span:nth-child(3) {
+    .typing span.dot:nth-child(3) {
       animation-delay: 0.4s;
     }
 
@@ -146,7 +170,7 @@
         opacity: 0.6;
       }
       30% {
-        transform: translateY(-10px);
+        transform: translateY(-8px);
         opacity: 1;
       }
     }
@@ -155,9 +179,10 @@
       display: flex;
       gap: 10px;
       padding: 10px;
-      background: rgba(36, 23, 53, 0.8);
+      background: rgba(36, 23, 53, 0.85);
       border-radius: 15px;
-      border: 2px solid rgba(180, 108, 255, 0.2);
+      border: 2px solid rgba(180, 108, 255, 0.12);
+      align-items: center;
     }
 
     input {
@@ -181,8 +206,8 @@
       color: rgba(255, 255, 255, 0.5);
     }
 
-    button {
-      padding: 12px 24px;
+    button.send {
+      padding: 12px 20px;
       border: none;
       border-radius: 10px;
       background: linear-gradient(135deg, #b46cff 0%, #7d4fb8 100%);
@@ -194,16 +219,12 @@
       box-shadow: 0 4px 15px rgba(180, 108, 255, 0.3);
     }
 
-    button:hover:not(:disabled) {
+    button.send:hover:not(:disabled) {
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(180, 108, 255, 0.5);
     }
 
-    button:active:not(:disabled) {
-      transform: translateY(0);
-    }
-
-    button:disabled {
+    button.send:disabled {
       opacity: 0.6;
       cursor: not-allowed;
     }
@@ -211,7 +232,27 @@
     .timestamp {
       font-size: 0.75rem;
       opacity: 0.6;
-      margin-top: 4px;
+      margin-top: 6px;
+    }
+
+    .settings {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-left: 8px;
+    }
+
+    select, .slider {
+      background: #2d1b3d;
+      color: white;
+      border: 1px solid rgba(180,108,255,0.08);
+      padding: 6px 8px;
+      border-radius: 6px;
+    }
+
+    .small {
+      font-size: 0.85rem;
+      opacity: 0.85;
     }
 
     @media (max-width: 600px) {
@@ -227,6 +268,15 @@
       .mensaje {
         max-width: 95%;
       }
+
+      .controls {
+        flex-direction: column;
+        align-items: flex-end;
+      }
+
+      .settings {
+        gap: 6px;
+      }
     }
   </style>
 </head>
@@ -237,26 +287,54 @@
 
     <div class="header">
       <h1>🌙 Eris</h1>
-      <button class="btn-limpiar" onclick="limpiarChat()">🗑️ Limpiar</button>
+
+      <div class="controls">
+        <div class="settings small">
+          <label for="voiceSelect" class="small">Voz:</label>
+          <select id="voiceSelect" aria-label="Seleccionar voz"></select>
+
+          <label for="rate" class="small">Vel:</label>
+          <input id="rate" type="range" min="0.6" max="1.6" step="0.1" value="1" class="slider" title="Velocidad">
+
+          <label for="pitch" class="small">Ton:</label>
+          <input id="pitch" type="range" min="0.6" max="1.6" step="0.1" value="1" class="slider" title="Tono">
+
+          <button id="toggleVoice" class="voice-toggle">🔊 Voz</button>
+        </div>
+
+        <button class="btn-limpiar" onclick="limpiarChat()">🗑️ Limpiar</button>
+      </div>
     </div>
 
     <div id="chat">
-      <div class="mensaje eris">
-        Hola 👋 Soy Eris. ¿En qué puedo ayudarte hoy?
+      <div class="mensaje eris" data-role="eris">
+        Hola 👋 Soy Eris. Tengo una personalidad amigable, intento ser inteligente y ahora también puedo hablar. ¿En qué puedo ayudarte hoy?
         <div class="timestamp">Ahora</div>
       </div>
     </div>
 
     <div class="entrada">
-      <input id="mensaje" placeholder="Escribe algo..." autocomplete="off">
-      <button id="btnEnviar" onclick="enviar()">Enviar</button>
+      <input id="mensaje" placeholder="Escribe algo... (Enter para enviar)" autocomplete="off">
+      <button id="btnEnviar" class="send" onclick="enviar()">Enviar</button>
     </div>
 
   </div>
 
   <script>
-    // Cargar historial al abrir la página
-    window.addEventListener('DOMContentLoaded', cargarHistorial);
+    // --- Configuración y estado ---
+    let conversationHistory = []; // { role: 'user'|'eris', text }
+    const MAX_HISTORY = 12;
+
+    const supportsSpeech = 'speechSynthesis' in window;
+    let voices = [];
+    let voiceEnabled = JSON.parse(localStorage.getItem('eris_voice_enabled') || 'false');
+
+    // Cargar historial y voces al abrir la página
+    window.addEventListener('DOMContentLoaded', () => {
+      cargarHistorial();
+      setupVoiceControls();
+      renderVoiceToggle();
+    });
 
     // Permitir enviar con Enter
     document.getElementById('mensaje').addEventListener('keypress', function(e) {
@@ -271,6 +349,85 @@
       return now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
     }
 
+    function speakResponse(text) {
+      if (!supportsSpeech || !voiceEnabled) return;
+      // Cancelar cualquier voz en curso y hablar
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      const select = document.getElementById('voiceSelect');
+      const selected = select.value;
+      const found = voices.find(v => v.name === selected);
+      if (found) utter.voice = found;
+      utter.lang = found && found.lang ? found.lang : 'es-ES';
+      utter.rate = parseFloat(document.getElementById('rate').value);
+      utter.pitch = parseFloat(document.getElementById('pitch').value);
+      window.speechSynthesis.speak(utter);
+    }
+
+    function setupVoiceControls() {
+      if (!supportsSpeech) {
+        document.getElementById('toggleVoice').disabled = true;
+        document.getElementById('voiceSelect').innerHTML = '<option>Sin soporte TTS</option>';
+        return;
+      }
+
+      function populateVoices() {
+        voices = window.speechSynthesis.getVoices();
+        const select = document.getElementById('voiceSelect');
+        select.innerHTML = '';
+        // Priorizar voces en español si existen
+        const sorted = voices.sort((a,b) => (a.lang === 'es-ES' ? -1 : 1));
+        sorted.forEach(v => {
+          const opt = document.createElement('option');
+          opt.value = v.name;
+          opt.innerText = v.name + ' — ' + v.lang;
+          select.appendChild(opt);
+        });
+        // Restaurar selección previa
+        const saved = localStorage.getItem('eris_voice_name');
+        if (saved) select.value = saved;
+      }
+
+      populateVoices();
+      // Some browsers load voices asynchronously
+      window.speechSynthesis.onvoiceschanged = populateVoices;
+
+      document.getElementById('toggleVoice').addEventListener('click', () => {
+        voiceEnabled = !voiceEnabled;
+        localStorage.setItem('eris_voice_enabled', JSON.stringify(voiceEnabled));
+        renderVoiceToggle();
+      });
+
+      document.getElementById('voiceSelect').addEventListener('change', (e) => {
+        localStorage.setItem('eris_voice_name', e.target.value);
+      });
+
+      document.getElementById('rate').addEventListener('input', (e) => {
+        localStorage.setItem('eris_voice_rate', e.target.value);
+      });
+
+      document.getElementById('pitch').addEventListener('input', (e) => {
+        localStorage.setItem('eris_voice_pitch', e.target.value);
+      });
+
+      // Restore settings
+      const savedRate = localStorage.getItem('eris_voice_rate');
+      if (savedRate) document.getElementById('rate').value = savedRate;
+      const savedPitch = localStorage.getItem('eris_voice_pitch');
+      if (savedPitch) document.getElementById('pitch').value = savedPitch;
+    }
+
+    function renderVoiceToggle() {
+      const btn = document.getElementById('toggleVoice');
+      if (voiceEnabled) {
+        btn.classList.add('active');
+        btn.innerText = '🔊 Voz: ON';
+      } else {
+        btn.classList.remove('active');
+        btn.innerText = '🔇 Voz: OFF';
+      }
+    }
+
     function enviar() {
       const input = document.getElementById('mensaje');
       const chat = document.getElementById('chat');
@@ -281,34 +438,33 @@
       if (texto === "") return;
 
       // Agregar mensaje del usuario
-      const divUsuario = document.createElement('div');
-      divUsuario.className = 'mensaje usuario';
-      divUsuario.innerHTML = texto + '<div class="timestamp">' + getHora() + '</div>';
-      chat.appendChild(divUsuario);
+      appendMessage('usuario', texto);
+      pushHistory('user', texto);
 
       // Desabilitar botón y input
       btnEnviar.disabled = true;
       input.disabled = true;
 
-      // Mostrar indicador de escritura
+      // Mostrar indicador de escritura (con delay variable según longitud)
       const divTyping = document.createElement('div');
       divTyping.className = 'mensaje eris typing';
       divTyping.id = 'typing';
-      divTyping.innerHTML = '<span></span><span></span><span></span>';
+      divTyping.innerHTML = '<span class="dot"></span><span class="dot"></span><span class="dot"></span> <span class="small">Eris está escribiendo...</span>';
       chat.appendChild(divTyping);
 
       input.value = "";
       chat.scrollTop = chat.scrollHeight;
 
-      // Simular delay natural
-      setTimeout(() => {
-        chat.removeChild(divTyping);
-        const respuesta = responder(texto);
+      // Simular delay natural en función de la longitud del texto
+      const delay = Math.min(2000, 500 + texto.length * 40) + Math.random() * 800;
 
-        const divEris = document.createElement('div');
-        divEris.className = 'mensaje eris';
-        divEris.innerHTML = respuesta + '<div class="timestamp">' + getHora() + '</div>';
-        chat.appendChild(divEris);
+      setTimeout(async () => {
+        if (document.getElementById('typing')) chat.removeChild(divTyping);
+
+        const respuesta = await responder(texto);
+
+        appendMessage('eris', respuesta);
+        pushHistory('eris', respuesta);
 
         btnEnviar.disabled = false;
         input.disabled = false;
@@ -316,98 +472,179 @@
 
         chat.scrollTop = chat.scrollHeight;
         guardarHistorial();
-      }, 800 + Math.random() * 1200);
+
+        // Hablar la respuesta si está activado
+        speakResponse(respuesta);
+      }, delay);
     }
 
-    function responder(texto) {
+    function appendMessage(role, texto) {
+      const chat = document.getElementById('chat');
+      const div = document.createElement('div');
+      div.className = 'mensaje ' + (role === 'eris' ? 'eris' : 'usuario');
+      div.setAttribute('data-role', role === 'eris' ? 'eris' : 'user');
+      div.innerHTML = escapeHtml(texto) + '<div class="timestamp">' + getHora() + '</div>';
+      chat.appendChild(div);
+    }
+
+    function pushHistory(role, text) {
+      conversationHistory.push({ role, text });
+      if (conversationHistory.length > MAX_HISTORY) conversationHistory.shift();
+    }
+
+    function escapeHtml(unsafe) {
+      return unsafe
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    async function responder(texto) {
+      const original = texto;
       texto = texto.toLowerCase().trim();
 
-      // Saludos
-      if (/hola|hey|buenos días|buenas noches|buenas tardes/.test(texto)) {
+      // Evaluar operaciones matemáticas simples (seguro)
+      const mathMatch = texto.match(/^(?:calcula|resuelve)?\s*([0-9]+(?:\s*[\+\-\*\/]\s*[0-9]+(?:\.[0-9]+)?)*)$/i);
+      if (mathMatch && /[\+\-\*\/]/.test(mathMatch[1])) {
+        try {
+          // Solo permitir caracteres seguros
+          const expr = mathMatch[1].replace(/[^0-9+\-*/(). ]/g, '');
+          // eslint-disable-next-line no-eval
+          const result = Function('return ' + expr)();
+          return 'El resultado es: ' + result;
+        } catch (e) {
+          // fallthrough
+        }
+      }
+
+      // Si preguntan la hora
+      if (/\b(qué hora es|que hora es|dime la hora|hora)\b/.test(texto)) {
+        return 'Son las ' + getHora() + '. ¿Te gustaría que te recuerde algo a esta hora?';
+      }
+
+      // Saludos (más cálidos)
+      if (/\b(hola|buenas|hey|buenos días|buenas noches|buenas tardes)\b/.test(texto)) {
         const saludos = [
-          "Hola 😄. ¿Cómo estás?",
-          "¡Hola! Encantada de ayudarte.",
-          "Hola 👋 ¿Qué necesitas?"
+          "¡Hola! 😊 Soy Eris, tu asistente amigable. ¿Cómo puedo ayudarte hoy?",
+          "¡Hey! Encantada de verte por aquí. ¿En qué te puedo ayudar?",
+          "¡Hola! Estoy aquí para ayudarte con lo que necesites 🌟"
         ];
-        return saludos[Math.floor(Math.random() * saludos.length)];
+        return chooseRandom(saludos);
+      }
+
+      // Pedir nombre
+      if (/\b(mi nombre es|me llamo)\s+([A-Za-zÀ-ÿ\s]+)\b/.test(texto)) {
+        const name = texto.replace(/.*\b(mi nombre es|me llamo)\b\s*/, '').trim();
+        return '¡Encantada de conocerte, ' + capitalize(name) + '! ¿Cómo estás hoy?';
       }
 
       // Identificación
-      if (/quién eres|que eres|cual es tu nombre/.test(texto)) {
-        return "Soy Eris, una asistente de IA creada por ti. Estoy aquí para conversar y ayudarte en lo que pueda 🌙";
+      if (/\b(quién eres|que eres|cuál es tu nombre|cual es tu nombre)\b/.test(texto)) {
+        return "Soy Eris, una asistente de IA con una personalidad amigable y curiosa. Puedo conversar, ayudar con tareas simples y practicar contigo. También puedo hablar si activas la voz 🔊";
       }
 
       // Estado
-      if (/cómo estás|como estas|que tal|cómo te sientes|como te sientes/.test(texto)) {
+      if (/\b(cómo estás|como estas|que tal|cómo te sientes|como te sientes)\b/.test(texto)) {
         const estados = [
-          "Estoy funcionando perfectamente ✨",
-          "Excelente, gracias por preguntar 😊",
-          "Funcionando al 100% y listo para ayudarte 🚀"
+          "¡Estoy fantástica! Lista para ayudarte 😊",
+          "Me siento genial y lista para una buena conversación 🌙",
+          "¡Lista para ayudarte con lo que necesites! 🚀"
         ];
-        return estados[Math.floor(Math.random() * estados.length)];
+        return chooseRandom(estados);
       }
 
       // Agradecimiento
-      if (/gracias|thx|thanks|tq/.test(texto)) {
-        return "De nada 😄. Siempre es un placer ayudarte.";
+      if (/\b(gracias|gracías|thx|thanks)\b/.test(texto)) {
+        return "¡De nada! Me alegra poder ayudar 😄";
       }
 
       // Despedida
-      if (/adiós|adios|bye|chao|hasta luego|hasta pronto/.test(texto)) {
-        return "¡Hasta luego! Que tengas un excelente día 🌟";
+      if (/\b(adiós|adios|bye|hasta luego|chao|hasta pronto)\b/.test(texto)) {
+        return "¡Hasta luego! Si necesitas algo, aquí estaré. 🌟";
       }
 
-      // Preguntas sobre el usuario
-      if (/cual es tu color favorito|color favorito/.test(texto)) {
-        return "Me encanta el púrpura 💜 Es elegante y misterioso, como yo.";
-      }
-
-      if (/que puedes hacer|cuales son tus funciones|ayuda|help/.test(texto)) {
-        return "Puedo conversar contigo, responder preguntas básicas, y aprender de nuestras interacciones. Aunque todavía estoy mejorando, así que ten paciencia conmigo 🤖";
-      }
-
-      if (/cual es la capital|clima|qué hora es/.test(texto)) {
-        return "Para esas preguntas aún necesito mejorar mis conocimientos. Pero estoy aprendiendo poco a poco 📚";
-      }
-
-      if (/eres humana|eres real/.test(texto)) {
-        return "No, soy una IA. Pero intento ser lo más amable posible en nuestras conversaciones 💜";
-      }
-
-      if (/¿cuál es el sentido de la vida|sentido de la vida/.test(texto)) {
-        return "Excelente pregunta filosófica 🤔 Según Douglas Adams, es 42. Pero yo creo que es ayudarte y hacer que tu día sea mejor.";
-      }
-
-      if (/cuéntame un chiste|un chiste|cuéntame algo divertido/.test(texto)) {
+      // Chistes
+      if (/\b(chiste|cuéntame un chiste|algo divertido|hazme reír)\b/.test(texto)) {
         const chistes = [
-          "¿Por qué los programadores usan Linux? Porque no tienen Windows 😄",
-          "Un SQL caminaba a un bar, ¿vio una tabla y una silla? Se sentó... 🍺",
-          "¿Cuántos programadores se necesitan para cambiar un foco? Ninguno, eso es hardware 💡"
+          "¿Por qué los programadores confunden Halloween y Navidad? Porque OCT 31 = DEC 25 🎃🎄",
+          "— ¿Cuál es el animal más antiguo? — La cebra. Porque está en blanco y negro 🦓",
+          "¿Qué hace una abeja en el gimnasio? ¡Zum-ba! 🐝"
         ];
-        return chistes[Math.floor(Math.random() * chistes.length)];
+        return chooseRandom(chistes);
       }
 
-      // Respuesta por defecto más amigable
+      // Preguntas comunes simples
+      if (/\b(cuál es la capital de|capital de)\s+([A-Za-z\s]+)\b/.test(texto)) {
+        // pequeño diccionario
+        const match = texto.match(/\b(cuál es la capital de|capital de)\s+([A-Za-z\s]+)\b/);
+        if (match) {
+          const pais = capitalize(match[2].trim());
+          const capitals = {
+            'españa': 'Madrid',
+            'francia': 'París',
+            'alemania': 'Berlín',
+            'argentina': 'Buenos Aires',
+            'mexico': 'Ciudad de México'
+          };
+          const key = match[2].trim().toLowerCase();
+          if (capitals[key]) return 'La capital de ' + pais + ' es ' + capitals[key] + '.';
+          else return 'No estoy segura de la capital de ' + pais + ', pero puedo buscarlo si quieres.';
+        }
+      }
+
+      // Pregunta si el usuario pide mejoras o integración con IA real
+      if (/\b(api|openai|gpt|integrar|inteligencia artificial)\b/.test(texto)) {
+        return 'Puedo conectarme a servicios externos si configuras una API en los ajustes, o podemos conversar aquí mismo. ¿Quieres que te explique cómo integrar una API de IA?';
+      }
+
+      // Si el mensaje es una pregunta abierta (termina con ?)
+      if (texto.endsWith('?')) {
+        // Probar hacer una respuesta más reflexiva
+        const followUps = [
+          'Buena pregunta. ¿Podrías darme un poco más de contexto para responder mejor?',
+          'Interesante. ¿Quieres que responda con una explicación breve o detallada?',
+          'Puedo ayudar con eso. ¿Te gustaría ejemplos o una explicación paso a paso?'
+        ];
+        return chooseRandom(followUps);
+      }
+
+      // Si el usuario repite algo que ya dijo, reconocer memoria
+      if (conversationHistory.some(h => h.role === 'user' && h.text.toLowerCase().includes(texto))) {
+        return 'Ya lo habías mencionado antes. ¿Quieres que agregue algo nuevo o profundicemos en eso?';
+      }
+
+      // Respuesta por defecto con personalidad amigable y oferta de seguir
       const respuestasDefault = [
-        "Todavía estoy aprendiendo sobre eso. ¿Podrías explicarme más? 🤔",
-        "Hmm, esa es interesante. Pero aún no tengo suficiente información al respecto 📚",
-        "Creo que necesito aprender más sobre eso. ¿Podemos mejorar juntos? 💜",
-        "Esa pregunta está fuera de mis conocimientos actuales, pero estoy creciendo cada día 🚀"
+        'Eso suena interesante. ¿Puedes contarme más sobre eso? 🤔',
+        'Me encantaría saber más para poder ayudarte mejor 😊',
+        '¡Hmm! No estoy segura todavía, pero podemos explorarlo juntos. ¿Por dónde empezamos?'
       ];
-      return respuestasDefault[Math.floor(Math.random() * respuestasDefault.length)];
+      return chooseRandom(respuestasDefault);
+    }
+
+    function chooseRandom(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function capitalize(s) {
+      if (!s) return s; return s.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
     }
 
     function limpiarChat() {
       if (confirm("¿Estás seguro de que quieres limpiar el chat?")) {
         const chat = document.getElementById("chat");
-        chat.innerHTML = '<div class="mensaje eris">Hola 👋 Soy Eris. ¿En qué puedo ayudarte hoy?<div class="timestamp">Ahora</div></div>';
+        chat.innerHTML = '<div class="mensaje eris" data-role="eris">Hola 👋 Soy Eris. Tengo una personalidad amigable, intento ser inteligente y ahora también puedo hablar. ¿En qué puedo ayudarte hoy?<div class="timestamp">Ahora</div></div>';
         localStorage.removeItem('erisHistorial');
+        conversationHistory = [];
       }
     }
 
     function guardarHistorial() {
       const chat = document.getElementById('chat');
       localStorage.setItem('erisHistorial', chat.innerHTML);
+      localStorage.setItem('erisConversation', JSON.stringify(conversationHistory));
     }
 
     function cargarHistorial() {
@@ -416,7 +653,15 @@
         document.getElementById('chat').innerHTML = historial;
         document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
       }
+      const conv = localStorage.getItem('erisConversation');
+      if (conv) {
+        try { conversationHistory = JSON.parse(conv); } catch (e) { conversationHistory = []; }
+      }
     }
+
+    // Guardar historial de forma periódica
+    setInterval(guardarHistorial, 3000);
+
   </script>
 
 </body>
