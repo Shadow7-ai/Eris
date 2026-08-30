@@ -1,1 +1,157 @@
-index.htm1
+```html
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eris</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #171021;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .contenedor {
+      width: 90%;
+      max-width: 600px;
+      background: #241735;
+      padding: 25px;
+      border-radius: 20px;
+      box-shadow: 0 0 25px #000;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    #chat {
+      height: 350px;
+      overflow-y: auto;
+      background: #120c19;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+    }
+
+    .mensaje {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    .usuario {
+      background: #493064;
+      text-align: right;
+    }
+
+    .eris {
+      background: #30203d;
+    }
+
+    .entrada {
+      display: flex;
+      gap: 10px;
+    }
+
+    input {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      outline: none;
+    }
+
+    button {
+      padding: 12px 18px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="contenedor">
+    <h1>🌙 Eris</h1>
+
+    <div id="chat">
+      <div class="mensaje eris">
+        Hola. Soy Eris. 👋<br>
+        Todavía estoy en desarrollo, pero podemos empezar a conversar.
+      </div>
+    </div>
+
+    <div class="entrada">
+      <input id="mensaje" type="text" placeholder="Escribe algo..." autocomplete="off">
+      <button onclick="enviar()">Enviar</button>
+    </div>
+  </div>
+
+  <script>
+    function enviar() {
+      const input = document.getElementById("mensaje");
+      const chat = document.getElementById("chat");
+
+      const texto = input.value.trim();
+
+      if (texto === "") return;
+
+      chat.innerHTML += `
+        <div class="mensaje usuario">
+          ${texto}
+        </div>
+      `;
+
+      let respuesta = responder(texto);
+
+      chat.innerHTML += `
+        <div class="mensaje eris">
+          ${respuesta}
+        </div>
+      `;
+
+      input.value = "";
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function responder(texto) {
+      const mensaje = texto.toLowerCase();
+
+      if (mensaje.includes("hola")) {
+        return "Hola 😄. Soy Eris.";
+      }
+
+      if (mensaje.includes("cómo estás") || mensaje.includes("como estas")) {
+        return "Estoy funcionando y lista para seguir desarrollándome. 🤖";
+      }
+
+      if (mensaje.includes("quién eres") || mensaje.includes("quien eres")) {
+        return "Soy Eris, tu proyecto personal de IA.";
+      }
+
+      if (mensaje.includes("adiós") || mensaje.includes("adios")) {
+        return "Nos vemos. 👋";
+      }
+
+      return "Entiendo. Todavía estoy aprendiendo. Podemos mejorarme poco a poco.";
+    }
+
+    document.getElementById("mensaje").addEventListener("keydown", function(event) {
+      if (event.key === "Enter") {
+        enviar();
+      }
+    });
+  </script>
+
+</body>
+</html>
+```
