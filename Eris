@@ -43,6 +43,7 @@
           <button id="toggleVoice" class="btn ghost" aria-pressed="false">🔇 Voz</button>
         </div>
         <div style="display:flex;gap:8px;align-items:center;margin-left:8px">
+          <button id="toggleAI" class="btn ghost">🤖 AI: OFF</button>
           <button id="toggleListen" class="btn ghost">🎙️ Escuchar</button>
           <button id="btnClear" class="btn ghost">🗑️ Limpiar</button>
           <button id="btnExport" class="btn">⬇️ Export</button>
@@ -80,8 +81,7 @@
     let listening = false;
 
     // API integration scaffold (local mode by default)
-    let useExternalAI = false; // toggle to use external API
-    // NOTE: To integrate an API (OpenAI, etc.) add a safe server-side proxy; do NOT store secrets in client-side code.
+    let useExternalAI = JSON.parse(localStorage.getItem('eris_use_external_ai') || 'false'); // toggle to use external API
 
     // UI refs
     const chatEl = document.getElementById('chat');
@@ -93,12 +93,14 @@
     const importFile = document.getElementById('importFile');
     const toggleVoice = document.getElementById('toggleVoice');
     const toggleListen = document.getElementById('toggleListen');
+    const toggleAI = document.getElementById('toggleAI');
 
     // Initialization
     window.addEventListener('DOMContentLoaded', () => {
       loadFromStorage();
       setupTTS();
       renderVoiceToggle();
+      renderAIToggle();
       setupEvents();
       setupSTT();
     });
@@ -111,6 +113,7 @@
       btnImport.addEventListener('click', ()=>importFile.click());
       importFile.addEventListener('change', handleImportFile);
       toggleVoice.addEventListener('click', ()=>{ voiceEnabled = !voiceEnabled; localStorage.setItem('eris_voice_enabled', JSON.stringify(voiceEnabled)); renderVoiceToggle(); });
+      toggleAI.addEventListener('click', ()=>{ useExternalAI = !useExternalAI; localStorage.setItem('eris_use_external_ai', JSON.stringify(useExternalAI)); renderAIToggle(); });
       toggleListen.addEventListener('click', toggleListening);
       window.addEventListener('beforeunload', ()=>{ saveToStorage(); });
     }
@@ -119,6 +122,7 @@
     function saveToStorage(){
       localStorage.setItem('erisChatHTML', chatEl.innerHTML);
       localStorage.setItem('erisConversation', JSON.stringify(conversationHistory));
+      localStorage.setItem('eris_use_external_ai', JSON.stringify(useExternalAI));
     }
 
     function loadFromStorage(){
@@ -200,9 +204,9 @@
 
     // --- Message sending flow ---
     async function sendMessage(){
-      const text = inputEl.value.trim(); if(!text) return; inputEl.value=''; appendMessage('user',text); showTyping();
+      const text = inputEl.value.trim(); if(!text) return; inputEl.value=''; appendMessage('user',text);
+      showTyping();
       try{
-        // If external AI mode is enabled, call external API (scaffold)
         let reply='';
         if(useExternalAI){
           reply = await callExternalAI(text, conversationHistory);
@@ -240,15 +244,36 @@
 
     // --- External AI scaffold ---
     async function callExternalAI(userText, history){
-      // Scaffold: Implement server-side proxy to call real AI (OpenAI, etc.)
-      // Example POST body: {messages: history.concat({role:'user', content:userText}), max_tokens:500}
-      // For now fallback to local responder
-      return await responder(userText);
+      // Build messages from history (keep recent ones)
+      const msgs = [];
+      // optional system prompt
+      msgs.push({role:'system', content: 'Eres Eris, una asistente de IA amigable, concisa y servicial. Responde en español cuando el usuario lo haga.'});
+      const recent = history.slice(-10);
+      recent.forEach(h=>{ msgs.push({role: h.role==='user'?'user':'assistant', content: h.text}); });
+      msgs.push({role:'user', content: userText});
+
+      try{
+        const controller = new AbortController();
+        const timeout = setTimeout(()=>controller.abort(), 20000);
+        const res = await fetch('/api/ai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: msgs, max_tokens: 700 }),
+          signal: controller.signal
+        });
+        clearTimeout(timeout);
+        if(!res.ok){ const t = await res.text(); throw new Error('API error: '+t); }
+        const data = await res.json();
+        const reply = data.reply || (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || 'Lo siento, no obtuve respuesta.';
+        return reply;
+      }catch(err){ console.error('callExternalAI', err); return 'Lo siento — no pude conectarme al servicio de IA externa. Revisa tu servidor proxy.'; }
     }
 
     // --- Utilities ---
     function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
     function toTitle(s){ return s.split(' ').filter(Boolean).map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' '); }
+
+    function renderAIToggle(){ toggleAI.classList.toggle('active', useExternalAI); toggleAI.textContent = useExternalAI? '🤖 AI: ON' : '🤖 AI: OFF'; }
 
     function clearChat(){ if(confirm('¿Seguro que quieres borrar el chat?')){ chatEl.innerHTML = '<div class="mensaje eris" data-role="eris">Hola 👋 Soy Eris. Soy amigable, curiosa e inteligente. Puedo hablar y escucharte. ¿En qué puedo ayudarte hoy?<div class="timestamp">Ahora</div></div>'; conversationHistory=[]; saveToStorage(); } }
 
