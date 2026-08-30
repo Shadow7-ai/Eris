@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eris - Chatbot de IA</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #171021 0%, #2d1b3d 100%);
+      color: white;
+      text-align: center;
+      min-height: 100vh;
+    }
+
+    .app {
+      max-width: 700px;
+      margin: 30px auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      height: 90vh;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding: 10px;
+    }
+
+    h1 {
+      color: #b46cff;
+      margin: 0;
+      font-size: 2rem;
+      text-shadow: 0 0 20px rgba(180, 108, 255, 0.5);
+    }
+
+    .btn-limpiar {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+
+    .btn-limpiar:hover {
+      background: #c0392b;
+      transform: scale(1.05);
+    }
+
+    #chat {
+      flex: 1;
+      overflow-y: auto;
+      background: rgba(36, 23, 53, 0.8);
+      padding: 20px;
+      border-radius: 15px;
+      text-align: left;
+      margin-bottom: 15px;
+      border: 2px solid rgba(180, 108, 255, 0.2);
+      scroll-behavior: smooth;
+    }
+
+    #chat::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    #chat::-webkit-scrollbar-track {
+      background: rgba(180, 108, 255, 0.1);
+      border-radius: 10px;
+    }
+
+    #chat::-webkit-scrollbar-thumb {
+      background: #b46cff;
+      border-radius: 10px;
+    }
+
+    .mensaje {
+      padding: 12px 16px;
+      margin: 10px 0;
+      border-radius: 12px;
+      animation: fadeIn 0.3s ease;
+      max-width: 85%;
+      word-wrap: break-word;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .eris {
+      background: linear-gradient(135deg, #382449 0%, #4a2d5c 100%);
+      align-self: flex-start;
+      border-left: 3px solid #b46cff;
+    }
+
+    .usuario {
+      background: linear-gradient(135deg, #6535a3 0%, #7d4fb8 100%);
+      align-self: flex-end;
+      text-align: right;
+      border-right: 3px solid #00d4ff;
+    }
+
+    .typing {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .typing span {
+      width: 8px;
+      height: 8px;
+      background: #b46cff;
+      border-radius: 50%;
+      animation: typing 1.4s infinite;
+    }
+
+    .typing span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .typing span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes typing {
+      0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: 0.6;
+      }
+      30% {
+        transform: translateY(-10px);
+        opacity: 1;
+      }
+    }
+
+    .entrada {
+      display: flex;
+      gap: 10px;
+      padding: 10px;
+      background: rgba(36, 23, 53, 0.8);
+      border-radius: 15px;
+      border: 2px solid rgba(180, 108, 255, 0.2);
+    }
+
+    input {
+      flex: 1;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: none;
+      background: #2d1b3d;
+      color: white;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    input:focus {
+      outline: none;
+      box-shadow: 0 0 15px rgba(180, 108, 255, 0.5);
+      background: #3d2b4d;
+    }
+
+    input::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #b46cff 0%, #7d4fb8 100%);
+      color: white;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(180, 108, 255, 0.3);
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(180, 108, 255, 0.5);
+    }
+
+    button:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .timestamp {
+      font-size: 0.75rem;
+      opacity: 0.6;
+      margin-top: 4px;
+    }
+
+    @media (max-width: 600px) {
+      .app {
+        margin: 10px;
+        height: 95vh;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .mensaje {
+        max-width: 95%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="app">
+
+    <div class="header">
+      <h1>🌙 Eris</h1>
+      <button class="btn-limpiar" onclick="limpiarChat()">🗑️ Limpiar</button>
+    </div>
+
+    <div id="chat">
+      <div class="mensaje eris">
+        Hola 👋 Soy Eris. ¿En qué puedo ayudarte hoy?
+        <div class="timestamp">Ahora</div>
+      </div>
+    </div>
+
+    <div class="entrada">
+      <input id="mensaje" placeholder="Escribe algo..." autocomplete="off">
+      <button id="btnEnviar" onclick="enviar()">Enviar</button>
+    </div>
+
+  </div>
+
+  <script>
+    // Cargar historial al abrir la página
+    window.addEventListener('DOMContentLoaded', cargarHistorial);
+
+    // Permitir enviar con Enter
+    document.getElementById('mensaje').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        enviar();
+      }
+    });
+
+    function getHora() {
+      const now = new Date();
+      return now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function enviar() {
+      const input = document.getElementById('mensaje');
+      const chat = document.getElementById('chat');
+      const btnEnviar = document.getElementById('btnEnviar');
+
+      const texto = input.value.trim();
+
+      if (texto === "") return;
+
+      // Agregar mensaje del usuario
+      const divUsuario = document.createElement('div');
+      divUsuario.className = 'mensaje usuario';
+      divUsuario.innerHTML = texto + '<div class="timestamp">' + getHora() + '</div>';
+      chat.appendChild(divUsuario);
+
+      // Desabilitar botón y input
+      btnEnviar.disabled = true;
+      input.disabled = true;
+
+      // Mostrar indicador de escritura
+      const divTyping = document.createElement('div');
+      divTyping.className = 'mensaje eris typing';
+      divTyping.id = 'typing';
+      divTyping.innerHTML = '<span></span><span></span><span></span>';
+      chat.appendChild(divTyping);
+
+      input.value = "";
+      chat.scrollTop = chat.scrollHeight;
+
+      // Simular delay natural
+      setTimeout(() => {
+        chat.removeChild(divTyping);
+        const respuesta = responder(texto);
+
+        const divEris = document.createElement('div');
+        divEris.className = 'mensaje eris';
+        divEris.innerHTML = respuesta + '<div class="timestamp">' + getHora() + '</div>';
+        chat.appendChild(divEris);
+
+        btnEnviar.disabled = false;
+        input.disabled = false;
+        input.focus();
+
+        chat.scrollTop = chat.scrollHeight;
+        guardarHistorial();
+      }, 800 + Math.random() * 1200);
+    }
+
+    function responder(texto) {
+      texto = texto.toLowerCase().trim();
+
+      // Saludos
+      if (/hola|hey|buenos días|buenas noches|buenas tardes/.test(texto)) {
+        const saludos = [
+          "Hola 😄. ¿Cómo estás?",
+          "¡Hola! Encantada de ayudarte.",
+          "Hola 👋 ¿Qué necesitas?"
+        ];
+        return saludos[Math.floor(Math.random() * saludos.length)];
+      }
+
+      // Identificación
+      if (/quién eres|que eres|cual es tu nombre/.test(texto)) {
+        return "Soy Eris, una asistente de IA creada por ti. Estoy aquí para conversar y ayudarte en lo que pueda 🌙";
+      }
+
+      // Estado
+      if (/cómo estás|como estas|que tal|cómo te sientes|como te sientes/.test(texto)) {
+        const estados = [
+          "Estoy funcionando perfectamente ✨",
+          "Excelente, gracias por preguntar 😊",
+          "Funcionando al 100% y listo para ayudarte 🚀"
+        ];
+        return estados[Math.floor(Math.random() * estados.length)];
+      }
+
+      // Agradecimiento
+      if (/gracias|thx|thanks|tq/.test(texto)) {
+        return "De nada 😄. Siempre es un placer ayudarte.";
+      }
+
+      // Despedida
+      if (/adiós|adios|bye|chao|hasta luego|hasta pronto/.test(texto)) {
+        return "¡Hasta luego! Que tengas un excelente día 🌟";
+      }
+
+      // Preguntas sobre el usuario
+      if (/cual es tu color favorito|color favorito/.test(texto)) {
+        return "Me encanta el púrpura 💜 Es elegante y misterioso, como yo.";
+      }
+
+      if (/que puedes hacer|cuales son tus funciones|ayuda|help/.test(texto)) {
+        return "Puedo conversar contigo, responder preguntas básicas, y aprender de nuestras interacciones. Aunque todavía estoy mejorando, así que ten paciencia conmigo 🤖";
+      }
+
+      if (/cual es la capital|clima|qué hora es/.test(texto)) {
+        return "Para esas preguntas aún necesito mejorar mis conocimientos. Pero estoy aprendiendo poco a poco 📚";
+      }
+
+      if (/eres humana|eres real/.test(texto)) {
+        return "No, soy una IA. Pero intento ser lo más amable posible en nuestras conversaciones 💜";
+      }
+
+      if (/¿cuál es el sentido de la vida|sentido de la vida/.test(texto)) {
+        return "Excelente pregunta filosófica 🤔 Según Douglas Adams, es 42. Pero yo creo que es ayudarte y hacer que tu día sea mejor.";
+      }
+
+      if (/cuéntame un chiste|un chiste|cuéntame algo divertido/.test(texto)) {
+        const chistes = [
+          "¿Por qué los programadores usan Linux? Porque no tienen Windows 😄",
+          "Un SQL caminaba a un bar, ¿vio una tabla y una silla? Se sentó... 🍺",
+          "¿Cuántos programadores se necesitan para cambiar un foco? Ninguno, eso es hardware 💡"
+        ];
+        return chistes[Math.floor(Math.random() * chistes.length)];
+      }
+
+      // Respuesta por defecto más amigable
+      const respuestasDefault = [
+        "Todavía estoy aprendiendo sobre eso. ¿Podrías explicarme más? 🤔",
+        "Hmm, esa es interesante. Pero aún no tengo suficiente información al respecto 📚",
+        "Creo que necesito aprender más sobre eso. ¿Podemos mejorar juntos? 💜",
+        "Esa pregunta está fuera de mis conocimientos actuales, pero estoy creciendo cada día 🚀"
+      ];
+      return respuestasDefault[Math.floor(Math.random() * respuestasDefault.length)];
+    }
+
+    function limpiarChat() {
+      if (confirm("¿Estás seguro de que quieres limpiar el chat?")) {
+        const chat = document.getElementById("chat");
+        chat.innerHTML = '<div class="mensaje eris">Hola 👋 Soy Eris. ¿En qué puedo ayudarte hoy?<div class="timestamp">Ahora</div></div>';
+        localStorage.removeItem('erisHistorial');
+      }
+    }
+
+    function guardarHistorial() {
+      const chat = document.getElementById('chat');
+      localStorage.setItem('erisHistorial', chat.innerHTML);
+    }
+
+    function cargarHistorial() {
+      const historial = localStorage.getItem('erisHistorial');
+      if (historial) {
+        document.getElementById('chat').innerHTML = historial;
+        document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
+      }
+    }
+  </script>
+
+</body>
+</html>
