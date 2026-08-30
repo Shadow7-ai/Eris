@@ -65,6 +65,9 @@
 
   <input type="file" id="importFile" accept="application/json" style="display:none" />
 
+  <!-- mathjs for safe expression evaluation -->
+  <script src="https://cdn.jsdelivr.net/npm/mathjs@11.8.0/dist/math.min.js"></script>
+
   <script>
     // State
     const MAX_HISTORY = 30;
@@ -162,7 +165,14 @@
       // 1) Math
       const math = t.match(/(?:^|\s)(?:calcula|resuelve|cuánto es|cuanto es)?\s*([0-9+\-*/().\s]+)\s*$/i);
       if(math && /[+\-*/]/.test(math[1])){
-        try{ const safe = math[1].replace(/[^0-9+\-*/(). ]/g,''); const res = Function('return '+safe)(); return 'El resultado es: '+res; }catch(e){}
+        try{
+          const safe = math[1].replace(/[^0-9+\-*/(). ,]/g,'');
+          // evaluate using mathjs to avoid eval
+          const res = mathjs.evaluate(safe);
+          return 'El resultado es: ' + res;
+        }catch(e){
+          // fallthrough
+        }
       }
 
       // 2) Time
@@ -218,7 +228,7 @@
       }catch(err){ hideTyping(); appendMessage('eris','Lo siento, ha ocurrido un error al generar la respuesta.'); console.error(err); }
     }
 
-    function showTyping(){ const d=document.createElement('div'); d.className='mensaje eris typing'; d.id='_typing_'; d.innerHTML='<span class="chip">Eris está escribiendo…</span>'; chatEl.appendChild(d); chatEl.scrollTop=chatEl.scrollHeight; }
+    function showTyping(){ const d=document.createElement('div'); d.className='mensaje eris typing'; d.id='_typing_'; d.innerHTML='<span class="chip">Eris está escribiendo…</span>'; chatEl.appendChild(d); chatEl.scrollTop = chatEl.scrollHeight; }
     function hideTyping(){ const t=document.getElementById('_typing_'); if(t) t.remove(); }
 
     // --- TTS helpers ---
