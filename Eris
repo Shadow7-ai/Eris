@@ -1,165 +1,73 @@
 index.html
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Eris 2.0</title>
+  <title>Eris</title>
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
     body {
       margin: 0;
-      min-height: 100vh;
       font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #120b1c, #24113a, #100b18);
+      background: #171021;
       color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      text-align: center;
     }
 
     .app {
-      width: 95%;
-      max-width: 750px;
-      height: 90vh;
-      max-height: 800px;
-      background: rgba(25, 18, 35, 0.95);
-      border: 1px solid rgba(180, 120, 255, 0.25);
-      border-radius: 24px;
-      overflow: hidden;
-      box-shadow: 0 0 40px rgba(120, 50, 200, 0.25);
-      display: flex;
-      flex-direction: column;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
     }
 
-    header {
-      padding: 18px 22px;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .logo {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #a855f7, #6d28d9);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 24px;
-      box-shadow: 0 0 20px rgba(168,85,247,0.5);
-    }
-
-    .info h1 {
-      margin: 0;
-      font-size: 22px;
-    }
-
-    .estado {
-      margin-top: 4px;
-      font-size: 13px;
-      color: #b9a6c9;
+    h1 {
+      color: #b46cff;
     }
 
     #chat {
-      flex: 1;
+      height: 400px;
       overflow-y: auto;
-      padding: 22px;
+      background: #241735;
+      padding: 15px;
+      border-radius: 15px;
+      text-align: left;
     }
 
     .mensaje {
-      display: flex;
-      margin-bottom: 18px;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 10px;
     }
 
-    .mensaje.usuario {
-      justify-content: flex-end;
+    .eris {
+      background: #382449;
     }
 
-    .burbuja {
-      max-width: 80%;
-      padding: 13px 16px;
-      border-radius: 18px;
-      line-height: 1.5;
-      white-space: pre-wrap;
-    }
-
-    .eris .burbuja {
-      background: #30213e;
-      border-bottom-left-radius: 5px;
-    }
-
-    .usuario .burbuja {
-      background: linear-gradient(135deg, #7c3aed, #9333ea);
-      border-bottom-right-radius: 5px;
-    }
-
-    .hora {
-      font-size: 10px;
-      opacity: 0.55;
-      margin-top: 5px;
-    }
-
-    .escribiendo {
-      color: #b9a6c9;
-      font-size: 13px;
-      padding: 5px;
-      display: none;
+    .usuario {
+      background: #6535a3;
+      text-align: right;
     }
 
     .entrada {
-      padding: 16px;
-      border-top: 1px solid rgba(255,255,255,0.08);
       display: flex;
+      margin-top: 15px;
       gap: 10px;
     }
 
-    #mensaje {
+    input {
       flex: 1;
+      padding: 12px;
+      border-radius: 10px;
       border: none;
-      outline: none;
-      padding: 14px 16px;
-      border-radius: 16px;
-      background: #17111f;
-      color: white;
-      font-size: 15px;
-    }
-
-    #mensaje::placeholder {
-      color: #8d7c9d;
     }
 
     button {
+      padding: 12px;
       border: none;
-      width: 50px;
-      border-radius: 16px;
-      background: #8b5cf6;
-      color: white;
-      font-size: 20px;
+      border-radius: 10px;
       cursor: pointer;
-    }
-
-    button:hover {
-      background: #a855f7;
-    }
-
-    @media (max-width: 600px) {
-      .app {
-        width: 100%;
-        height: 100vh;
-        max-height: none;
-        border-radius: 0;
-      }
-
-      .burbuja {
-        max-width: 88%;
-      }
     }
   </style>
 </head>
@@ -168,154 +76,63 @@ index.html
 
   <div class="app">
 
-    <header>
-      <div class="logo">E</div>
-
-      <div class="info">
-        <h1>Eris</h1>
-        <div class="estado">● En línea · Versión 2.0</div>
-      </div>
-    </header>
+    <h1>🌙 Eris</h1>
 
     <div id="chat">
-
       <div class="mensaje eris">
-        <div class="burbuja">
-          Hola 👋 Soy Eris.
-
-          Esta es mi versión 2.0. Todavía estoy en desarrollo, pero poco a poco podemos convertirme en tu asistente personal.
-          <div class="hora">Ahora</div>
-        </div>
+        Hola 👋 Soy Eris. Estoy lista para comenzar.
       </div>
-
-    </div>
-
-    <div id="escribiendo" class="escribiendo">
-      Eris está pensando...
     </div>
 
     <div class="entrada">
-      <input
-        id="mensaje"
-        type="text"
-        placeholder="Habla con Eris..."
-        autocomplete="off"
-      >
-
-      <button onclick="enviar()">➤</button>
+      <input id="mensaje" placeholder="Escribe algo...">
+      <button onclick="enviar()">Enviar</button>
     </div>
 
   </div>
 
   <script>
-
-    const input = document.getElementById("mensaje");
-    const chat = document.getElementById("chat");
-    const escribiendo = document.getElementById("escribiendo");
-
-    function horaActual() {
-      return new Date().toLocaleTimeString("es-MX", {
-        hour: "2-digit",
-        minute: "2-digit"
-      });
-    }
-
-    function agregarMensaje(texto, tipo) {
-
-      const mensaje = document.createElement("div");
-      mensaje.className = "mensaje " + tipo;
-
-      const burbuja = document.createElement("div");
-      burbuja.className = "burbuja";
-
-      burbuja.textContent = texto;
-
-      const hora = document.createElement("div");
-      hora.className = "hora";
-      hora.textContent = horaActual();
-
-      burbuja.appendChild(hora);
-      mensaje.appendChild(burbuja);
-      chat.appendChild(mensaje);
-
-      chat.scrollTop = chat.scrollHeight;
-    }
-
     function enviar() {
+      const input = document.getElementById("mensaje");
+      const chat = document.getElementById("chat");
 
       const texto = input.value.trim();
 
-      if (!texto) return;
+      if (texto === "") return;
 
-      agregarMensaje(texto, "usuario");
+      chat.innerHTML +=
+        '<div class="mensaje usuario">' + texto + '</div>';
+
+      let respuesta = responder(texto);
+
+      chat.innerHTML +=
+        '<div class="mensaje eris">' + respuesta + '</div>';
 
       input.value = "";
-
-      escribiendo.style.display = "block";
-
-      setTimeout(() => {
-
-        const respuesta = responder(texto);
-
-        escribiendo.style.display = "none";
-
-        agregarMensaje(respuesta, "eris");
-
-      }, 700);
+      chat.scrollTop = chat.scrollHeight;
     }
 
     function responder(texto) {
+      texto = texto.toLowerCase();
 
-      const mensaje = texto.toLowerCase();
-
-      if (mensaje.includes("hola")) {
-        return "Hola 😄. Me alegra verte. Soy Eris.";
+      if (texto.includes("hola")) {
+        return "Hola 😄. Soy Eris.";
       }
 
-      if (
-        mensaje.includes("quién eres") ||
-        mensaje.includes("quien eres")
-      ) {
-        return "Soy Eris, tu proyecto personal de inteligencia artificial. Estoy empezando, pero iremos agregando nuevas capacidades.";
+      if (texto.includes("quien eres")) {
+        return "Soy Eris, tu proyecto personal de IA.";
       }
 
-      if (
-        mensaje.includes("cómo estás") ||
-        mensaje.includes("como estas")
-      ) {
-        return "Estoy funcionando correctamente. Aunque todavía soy una versión inicial, estoy lista para seguir evolucionando.";
+      if (texto.includes("cómo estás") || texto.includes("como estas")) {
+        return "Estoy funcionando correctamente.";
       }
 
-      if (
-        mensaje.includes("gracias")
-      ) {
-        return "De nada 😄. Para eso estoy.";
+      if (texto.includes("gracias")) {
+        return "De nada 😄.";
       }
 
-      if (
-        mensaje.includes("adiós") ||
-        mensaje.includes("adios")
-      ) {
-        return "Hasta luego 👋. Aquí estaré cuando vuelvas.";
-      }
-
-      if (
-        mensaje.includes("eris")
-      ) {
-        return "¿Sí? Aquí estoy. 👀";
-      }
-
-      return "Interesante... todavía estoy aprendiendo a responder mejor. Esta parte la podremos mejorar cuando conectemos una IA real.";
+      return "Todavía estoy aprendiendo. Podemos mejorarme poco a poco.";
     }
-
-    input.addEventListener("keydown", function(event) {
-
-      if (event.key === "Enter") {
-        enviar();
-      }
-
-    });
-
   </script>
 
 </body>
