@@ -1,0 +1,25 @@
+/* styles for Eris (moved from inline) */
+*{box-sizing:border-box}
+:root{
+  --bg-1:#171021;--bg-2:#2d1b3d;--accent:#b46cff;--muted:rgba(255,255,255,0.7)
+}
+body{margin:0;font-family:Inter, 'Segoe UI', Tahoma, sans-serif;background:linear-gradient(135deg,var(--bg-1) 0%,var(--bg-2) 100%);color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.app{width:100%;max-width:780px;padding:20px;display:flex;flex-direction:column;gap:12px}
+.header{display:flex;justify-content:space-between;align-items:center}
+.header h1{color:var(--accent);margin:0;font-size:1.8rem;text-shadow:0 0 20px rgba(180,108,255,0.35)}
+.header-actions{display:flex;gap:8px}
+.btn-primary{background:linear-gradient(135deg,var(--accent),#7d4fb8);border:none;padding:10px 16px;border-radius:8px;color:#fff;cursor:pointer}
+.btn-danger{background:#e74c3c;border:none;padding:8px 12px;border-radius:8px;color:#fff;cursor:pointer}
+.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px;border-radius:8px;color:#fff;cursor:pointer}
+.chat{background:rgba(36,23,53,0.85);padding:16px;border-radius:12px;border:1px solid rgba(180,108,255,0.12);min-height:50vh;max-height:60vh;overflow:auto}
+.mensaje{padding:10px 14px;margin:10px 0;border-radius:12px;max-width:85%;word-wrap:break-word}
+.eris{background:linear-gradient(135deg,#382449,#4a2d5c);align-self:flex-start;border-left:3px solid var(--accent)}
+.usuario{background:linear-gradient(135deg,#6535a3,#7d4fb8);align-self:flex-end;text-align:right;border-right:3px solid #00d4ff}
+.entrada{display:flex;gap:10px;padding:10px;border-radius:12px;background:rgba(36,23,53,0.9);align-items:center}
+input[type=text],input,textarea{flex:1;padding:10px;border-radius:8px;border:none;background:#2d1b3d;color:#fff}
+.timestamp{font-size:.75rem;opacity:.65;margin-top:6px}
+.note{font-size:.8rem;color:var(--muted);margin:8px 0}
+dialog{width:min(520px,95%);border-radius:12px;padding:16px;border:none;background:#22162b;color:#fff}
+fieldset{border:1px solid rgba(255,255,255,0.04);padding:8px;border-radius:8px;margin-bottom:8px}
+label{display:block;margin:6px 0}
+@media(max-width:600px){.chat{min-height:55vh}.header h1{font-size:1.3rem}}
