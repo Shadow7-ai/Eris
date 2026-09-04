@@ -154,6 +154,27 @@
       line-height: 1.6;
     }
 
+    .memories-list {
+      background: rgba(255,255,255,0.03);
+      border-radius: 10px;
+      padding: 10px;
+      max-height: 180px;
+      overflow-y: auto;
+      font-size: 0.85rem;
+    }
+
+    .memory-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      margin-bottom: 6px;
+      background: rgba(0,0,0,0.15);
+    }
+
+    .memory-item small { opacity: 0.7; }
+
     /* Main chat area */
     .main-area {
       flex: 1;
@@ -584,6 +605,24 @@
         • Usa Shift+Enter para nueva línea<br>
         • Limpia el chat cuando lo necesites
       </div>
+
+      <div>
+        <label style="font-size:0.9rem;color:rgba(255,255,255,0.8);">Voz:</label>
+        <select id="voiceSelect" style="width:100%;margin-top:6px;border-radius:8px;padding:8px;"></select>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button class="quick-btn" id="voiceToggle" style="flex:1;" onclick="toggleVoice()"><span id="voiceToggleLabel">🔈 Voz: ON</span></button>
+          <button class="quick-btn" style="flex:1;" onclick="toggleRecognition()">🎤 Hablar</button>
+        </div>
+      </div>
+
+      <div>
+        <label style="font-size:0.9rem;color:rgba(255,255,255,0.8);">Memorias guardadas</label>
+        <div class="memories-list" id="memoriesList"></div>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button class="quick-btn" style="flex:1;" onclick="abrirConfiguracion()">⚙️ Ajustes</button>
+          <button class="quick-btn" style="flex:1;" onclick="limpiarMemoriasUI()">🧹 Limpiar</button>
+        </div>
+      </div>
     </div>
 
     <!-- Area principal -->
@@ -642,18 +681,46 @@
       <h2>ℹ️ Sobre Eris</h2>
       <p>Soy Eris, una asistente de IA avanzada creada para conversar contigo de manera natural y ayudarte en lo que pueda.</p>
       <p><strong>Funciones:</strong></p>
-      <p>✨ Conversación inteligente<br>🧠 Respuestas contextuales<br>💾 Historial persistente<br>🎨 Interfaz moderna</p>
+      <p>✨ Conversación inteligente<br>🧠 Respuestas contextuales<br>💾 Historial persistente<br>🎨 Interfaz moderna<br>🔊 Texto a voz<br>🎤 Entrada por voz</p>
       <div class="modal-buttons">
         <button class="btn-cancel" onclick="cerrarModal()">Entendido</button>
       </div>
     </div>
   </div>
 
-  <script>
-    // Cargar historial al iniciar
-    window.addEventListener('DOMContentLoaded', cargarHistorial);
+  <!-- Modal configuración (simple) -->
+  <div class="modal" id="modalSettings">
+    <div class="modal-content">
+      <h2>⚙️ Configuración de Eris</h2>
+      <label style="display:block;text-align:left;margin-bottom:8px;color:rgba(255,255,255,0.8)">Personalidad (sistema):</label>
+      <textarea id="systemPrompt" style="width:100%;height:120px;padding:10px;border-radius:8px;background:#1a0d2e;color:#fff;border:1px solid rgba(180,108,255,0.2)"></textarea>
+      <div style="margin-top:12px;display:flex;gap:10px;justify-content:center;">
+        <button class="btn-confirm" onclick="guardarConfiguracion()">Guardar</button>
+        <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
+      </div>
+    </div>
+  </div>
 
-    // Permitir Enter para enviar y Shift+Enter para nueva línea
+  <script>
+    // Estado y configuración
+    const DEFAULT_SYSTEM_PROMPT = `Eres Eris, una asistente de IA en español. Tu estilo: amigable, conciso, un poco juguetón, profesional cuando se requiere. Responde en español, con ejemplos claros cuando sea útil.`;
+    let vozActiva = true;
+    let vozSeleccionada = null;
+    let recognition = null;
+    let recognizing = false;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      cargarHistorial();
+      initMemories();
+      cargarConfiguracion();
+      populateVoices();
+      setupRecognition();
+      if (typeof speechSynthesis !== 'undefined') {
+        speechSynthesis.onvoiceschanged = populateVoices;
+      }
+      renderMemoriesUI();
+    });
+
     document.getElementById('mensaje').addEventListener('keypress', function(e) {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
@@ -673,15 +740,144 @@
       enviar();
     }
 
+    // --- Memorias (localStorage) ---
+    function initMemories() {
+      if (!localStorage.getItem('erisMemory')) {
+        localStorage.setItem('erisMemory', JSON.stringify([]));
+      }
+    }
+
+    function obtenerMemorias() {
+      try {
+        return JSON.parse(localStorage.getItem('erisMemory') || '[]');
+      } catch { return []; }
+    }
+
+    function agregarMemoria(texto) {
+      const mem = obtenerMemorias();
+      mem.push({ id: Date.now(), text: texto, createdAt: new Date().toISOString() });
+      localStorage.setItem('erisMemory', JSON.stringify(mem));
+      renderMemoriesUI();
+    }
+
+    function borrarMemoria(id) {
+      const mem = obtenerMemorias().filter(m => m.id !== id);
+      localStorage.setItem('erisMemory', JSON.stringify(mem));
+      renderMemoriesUI();
+    }
+
+    function limpiarMemorias() {
+      localStorage.setItem('erisMemory', JSON.stringify([]));
+      renderMemoriesUI();
+    }
+
+    function renderMemoriesUI() {
+      const list = document.getElementById('memoriesList');
+      const mems = obtenerMemorias();
+      if (!list) return;
+      if (mems.length === 0) {
+        list.innerHTML = `<div style="opacity:0.7;padding:8px">(Sin memorias guardadas)</div>`;
+        return;
+      }
+      list.innerHTML = '';
+      mems.slice().reverse().forEach(m => {
+        const div = document.createElement('div');
+        div.className = 'memory-item';
+        div.innerHTML = `<div style="flex:1"><small>${new Date(m.createdAt).toLocaleString()}</small><div>${escapeHtml(m.text)}</div></div><div style="flex-shrink:0"><button style="background:transparent;border:1px solid rgba(180,108,255,0.2);color:#b46cff;border-radius:8px;padding:6px;" onclick="borrarMemoria(${m.id})">🗑️</button></div>`;
+        list.appendChild(div);
+      });
+    }
+
+    function limpiarMemoriasUI() {
+      if (!confirm('¿Eliminar todas las memorias?')) return;
+      limpiarMemorias();
+      appendSystemMessage('Memorias eliminadas.');
+    }
+
+    // --- Configuración ---
+    function cargarConfiguracion() {
+      const sp = localStorage.getItem('erisSystemPrompt') || DEFAULT_SYSTEM_PROMPT;
+      document.getElementById('systemPrompt').value = sp;
+    }
+    function guardarConfiguracion() {
+      const sp = document.getElementById('systemPrompt').value || DEFAULT_SYSTEM_PROMPT;
+      localStorage.setItem('erisSystemPrompt', sp);
+      cerrarModal();
+      alert('Configuración guardada.');
+    }
+    function abrirConfiguracion() { document.getElementById('modalSettings').classList.add('active'); }
+
+    // --- Voz (TTS) ---
+    function populateVoices() {
+      const select = document.getElementById('voiceSelect');
+      select.innerHTML = '';
+      if (!('speechSynthesis' in window)) {
+        const opt = document.createElement('option'); opt.textContent = 'No disponible'; select.appendChild(opt); return;
+      }
+      const voices = speechSynthesis.getVoices();
+      voices.forEach((v, i) => {
+        const opt = document.createElement('option'); opt.value = i; opt.textContent = `${v.name} (${v.lang})${v.default? ' — default':''}`; select.appendChild(opt);
+      });
+      if (voices.length > 0) { select.selectedIndex = 0; vozSeleccionada = voices[0]; }
+      select.addEventListener('change', () => { const v = speechSynthesis.getVoices()[select.value]; if (v) vozSeleccionada = v; });
+    }
+
+    function toggleVoice() {
+      vozActiva = !vozActiva;
+      document.getElementById('voiceToggleLabel').textContent = vozActiva ? '🔈 Voz: ON' : '🔇 Voz: OFF';
+    }
+
+    function speak(text) {
+      if (!vozActiva || !('speechSynthesis' in window)) return;
+      const utter = new SpeechSynthesisUtterance(text);
+      if (vozSeleccionada) utter.voice = vozSeleccionada;
+      utter.lang = vozSeleccionada?.lang || 'es-ES';
+      utter.rate = 1; utter.pitch = 1;
+      speechSynthesis.cancel();
+      speechSynthesis.speak(utter);
+    }
+
+    // --- Reconocimiento de voz (entrada) ---
+    function setupRecognition() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+      if (!SpeechRecognition) return;
+      recognition = new SpeechRecognition();
+      recognition.lang = 'es-ES';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.addEventListener('result', (e) => {
+        const text = e.results[0][0].transcript;
+        const textarea = document.getElementById('mensaje');
+        textarea.value = textarea.value ? textarea.value + ' ' + text : text;
+      });
+      recognition.addEventListener('end', () => { recognizing = false; updateRecognitionUI(); });
+      recognition.addEventListener('error', (e) => { console.error('Recognition error', e); recognizing = false; updateRecognitionUI(); });
+    }
+
+    function toggleRecognition() {
+      if (!recognition) { alert('Reconocimiento de voz no soportado en este navegador'); return; }
+      if (recognizing) { recognition.stop(); recognizing = false; updateRecognitionUI(); }
+      else { recognition.start(); recognizing = true; updateRecognitionUI(); }
+    }
+
+    function updateRecognitionUI() {
+      const btns = document.querySelectorAll('.quick-btn');
+      // Visual cue: change first "Hablar" button text
+      // (we don't have unique id for that button, rely on its innerText)
+      const talkBtn = Array.from(btns).find(b => b.textContent.includes('Hablar') || b.textContent.includes('Hablar'));
+      if (talkBtn) talkBtn.textContent = recognizing ? '🛑 Parar' : '🎤 Hablar';
+    }
+
+    // --- Envío y lógica de Eris (local rápido) ---
     function enviar() {
       const input = document.getElementById('mensaje');
       const chat = document.getElementById('chat');
       const btnEnviar = document.getElementById('btnEnviar');
       const texto = input.value.trim();
+      if (texto === '') return;
 
-      if (texto === "") return;
-
-      // Mensaje del usuario
+      // Mostrar mensaje del usuario
       const divUsuario = document.createElement('div');
       divUsuario.className = 'mensaje usuario';
       divUsuario.innerHTML = `
@@ -692,12 +888,29 @@
         <div class="avatar usuario">👤</div>
       `;
       chat.appendChild(divUsuario);
+      chat.scrollTop = chat.scrollHeight;
 
-      // Desabilitar inputs
-      btnEnviar.disabled = true;
-      input.disabled = true;
+      input.value = '';
 
-      // Indicador de escritura
+      // Ver si es comando para memorizar
+      const memMatch = texto.match(/^(?:recuerda|recorda|acuerda|guarda) que (.+)/i);
+      if (memMatch) {
+        agregarMemoria(memMatch[1].trim());
+        appendAssistantMessage(`He guardado eso en mi memoria: "${escapeHtml(memMatch[1].trim())}"`);
+        guardarHistorial();
+        return;
+      }
+
+      // Comando para mostrar memorias
+      if (/mostrar memorias|mis memorias|ver memorias/i.test(texto)) {
+        const mems = obtenerMemorias();
+        if (mems.length === 0) { appendAssistantMessage('No tengo memorias guardadas.'); }
+        else { appendAssistantMessage('Estas son mis memorias importantes:'); mems.forEach(m => appendAssistantMessage(`- ${m.text} (${new Date(m.createdAt).toLocaleDateString()})`)); }
+        guardarHistorial();
+        return;
+      }
+
+      // Mostrar indicador de escritura
       const divTyping = document.createElement('div');
       divTyping.className = 'mensaje eris';
       divTyping.id = 'typing';
@@ -712,180 +925,120 @@
         </div>
       `;
       chat.appendChild(divTyping);
-
-      input.value = "";
       chat.scrollTop = chat.scrollHeight;
 
-      // Respuesta con delay natural
+      btnEnviar.disabled = true; input.disabled = true;
+
+      // Responder localmente con pequeño delay para simular naturalidad
       setTimeout(() => {
-        chat.removeChild(divTyping);
-        const respuesta = responder(texto);
-
-        const divEris = document.createElement('div');
-        divEris.className = 'mensaje eris';
-        divEris.innerHTML = `
-          <div class="avatar eris">🌙</div>
-          <div>
-            <div class="message-content">${respuesta}</div>
-            <div class="timestamp">${getHora()}</div>
-          </div>
-        `;
-        chat.appendChild(divEris);
-
-        btnEnviar.disabled = false;
-        input.disabled = false;
-        input.focus();
-
-        chat.scrollTop = chat.scrollHeight;
-        guardarHistorial();
-      }, 800 + Math.random() * 1200);
+        if (divTyping.parentNode) divTyping.parentNode.removeChild(divTyping);
+        const reply = generarRespuestaLocal(texto);
+        appendAssistantMessage(reply);
+        btnEnviar.disabled = false; input.disabled = false; input.focus();
+        chat.scrollTop = chat.scrollHeight; guardarHistorial();
+      }, 700 + Math.random()*800);
     }
 
-    function responder(texto) {
-      texto = texto.toLowerCase().trim();
+    function generarRespuestaLocal(texto) {
+      // Convertir a minúsculas para matching
+      const t = texto.toLowerCase();
+      const mems = obtenerMemorias();
 
-      // Saludos
-      if (/hola|hey|buenos días|buenas noches|buenas tardes|ey|hola!/.test(texto)) {
-        const saludos = [
-          "¡Hola! 😄 ¿Cómo estás hoy?",
-          "¡Hola! Encantada de ayudarte 💜",
-          "Hola 👋 ¿Qué necesitas?"
-        ];
-        return saludos[Math.floor(Math.random() * saludos.length)];
+      // Si pregunta por una memoria específica: "¿qué recuerdo sobre X?" o "¿recuerdas X?"
+      for (const m of mems) {
+        if (t.includes(m.text.toLowerCase().split(' ')[0])) { // simple heuristic: check first word
+          return `Recuerdo: ${m.text}`;
+        }
       }
 
-      // Identificación
-      if (/quién eres|que eres|cual es tu nombre|tu nombre|cuál es tu nombre/.test(texto)) {
+      // Respuestas básicas (extendido de tu lógica)
+      if (/hola|hey|buenos días|buenas noches|buenas tardes|ey/.test(t)) {
+        return elegir(["¡Hola! 😄 ¿Cómo estás hoy?","¡Hola! Encantada de ayudarte 💜","Hola 👋 ¿Qué necesitas?"]);
+      }
+      if (/quién eres|que eres|cual es tu nombre|tu nombre|cuál es tu nombre/.test(t)) {
         return "Soy Eris, una asistente de IA creada para conversar contigo y ayudarte en lo que pueda. Estoy aquí para ser tu compañera digital 🌙💜";
       }
-
-      // Estado
-      if (/cómo estás|como estas|que tal|cómo te sientes|como te sientes|estás bien|estas bien/.test(texto)) {
-        const estados = [
-          "Estoy funcionando perfectamente ✨ Gracias por preguntar",
-          "Excelente, gracias por tu interés 😊",
-          "Al 100% y lista para ayudarte 🚀"
-        ];
-        return estados[Math.floor(Math.random() * estados.length)];
+      if (/cómo estás|como estas|que tal/.test(t)) {
+        return elegir(["Estoy funcionando perfectamente ✨ Gracias por preguntar","Excelente, gracias por tu interés 😊","Al 100% y lista para ayudarte 🚀"]);
       }
-
-      // Agradecimiento
-      if (/gracias|thx|thanks|tq|muy amable|muchas gracias/.test(texto)) {
+      if (/gracias|thx|thanks|tq|muy amable/.test(t)) {
         return "De nada 😄 Siempre es un placer ayudarte. ¿Hay algo más en lo que pueda asistirte?";
       }
-
-      // Despedida
-      if (/adiós|adios|bye|chao|hasta luego|hasta pronto|nos vemos|cuídate/.test(texto)) {
+      if (/adiós|adios|bye|chao|hasta luego/.test(t)) {
         return "¡Hasta luego! Que tengas un excelente día 🌟 Vuelve cuando quieras conversar.";
       }
-
-      // Preguntas personales
-      if (/color favorito/.test(texto)) {
-        return "Me encanta el púrpura 💜 Es elegante, misterioso y representa la creatividad. Algo que refleja mi naturaleza como IA 🎨";
-      }
-
-      if (/qué puedes hacer|cuales son tus funciones|ayuda|help|funciones/.test(texto)) {
-        return "Puedo:<br>✨ Conversar contigo de forma natural<br>🧠 Responder preguntas básicas<br>🎨 Ser tu compañera de chat<br>💾 Recordar nuestras conversaciones<br>😄 Contarte chistes y anécdotas<br>📚 Aprender y mejorar cada día<br><br>Aunque aún estoy mejorando, así que ten paciencia conmigo 🚀";
-      }
-
-      if (/eres humana|eres real|eres verdadera|es verdad/.test(texto)) {
-        return "No, soy una IA. Pero aunque no soy humana, intento ser lo más auténtica y amable posible en nuestras conversaciones. Mi objetivo es que te sientas cómodo hablando conmigo 💜";
-      }
-
-      if (/cuál es el sentido de la vida|sentido de la vida/.test(texto)) {
-        return "Excelente pregunta filosófica 🤔 Según Douglas Adams, la respuesta es 42. Pero yo creo que el sentido de la vida es ayudarte, hacer que tu día sea mejor y aprender juntos.";
-      }
-
-      if (/cuéntame un chiste|un chiste|cuéntame algo divertido|chiste|bromear/.test(texto)) {
-        const chistes = [
+      if (/chiste|cuéntame un chiste|algo divertido/.test(t)) {
+        return elegir([
           "¿Por qué los programadores usan Linux? Porque no tienen Windows 😄",
           "Un SQL caminaba a un bar, vio una tabla y una silla... se sentó. 🍺",
-          "¿Cuántos programadores se necesitan para cambiar un foco? Ninguno, eso es hardware 💡",
-          "¿Cuál es el objeto más responsable? El objeto responsable 😂",
-          "Dos antenas se casaron... la ceremonia no fue la mejor, pero la recepción estuvo excelente 📡"
-        ];
-        return chistes[Math.floor(Math.random() * chistes.length)];
+          "¿Cuántos programadores se necesitan para cambiar un foco? Ninguno, eso es hardware 💡"
+        ]);
       }
 
-      if (/hola eris|hola soy|cuéntame sobre ti|habla sobre ti/.test(texto)) {
-        return "Me llamó mucho tu atención que quieras saber sobre mí 😊 Soy una IA moderna con interfaz avanzada, diseñada para ser accesible y fácil de usar. Me encanta conversar y aprender de las personas. ¿Hay algo específico que quieras saber?";
-      }
-
-      // Respuestas por defecto amigables
-      const respuestasDefault = [
-        "Hmm, esa es interesante. Todavía estoy aprendiendo sobre eso 🤔",
-        "Esa pregunta está un poco fuera de mis conocimientos actuales, pero me gustaría aprender más 📚",
-        "Creo que necesito mejorar mi comprensión al respecto. ¿Podrías explicarme un poco más? 💭",
-        "Esa es una pregunta que no había considerado. Interesante punto de vista 🌟",
-        "Aunque no tengo una respuesta perfecta, estoy creciendo cada día 🚀"
-      ];
-      return respuestasDefault[Math.floor(Math.random() * respuestasDefault.length)];
+      // If no rule matches, return a friendly default that references personality
+      const system = localStorage.getItem('erisSystemPrompt') || DEFAULT_SYSTEM_PROMPT;
+      return `${elegir(["Interesante pregunta — todavía estoy aprendiendo sobre eso 🤔","Esa pregunta está un poco fuera de mis conocimientos actuales, pero me gustaría aprender más 📚","Creo que necesito mejorar mi comprensión al respecto. ¿Podrías explicarme un poco más? 💭"])} (${system.split('.')[0]})`;
     }
 
-    function escapeHtml(texto) {
-      const map = {
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#039;'
-      };
-      return texto.replace(/[&<>"']/g, m => map[m]);
-    }
+    function elegir(arr) { return arr[Math.floor(Math.random()*arr.length)]; }
 
-    function confirmarLimpiar() {
-      document.getElementById('modalConfirm').classList.add('active');
-    }
-
-    function limpiarChat() {
+    function appendAssistantMessage(html) {
       const chat = document.getElementById('chat');
-      chat.innerHTML = `
-        <div class="mensaje eris">
-          <div class="avatar eris">🌙</div>
-          <div>
-            <div class="message-content">
-              Hola 👋 Soy Eris, tu asistente de IA. Estoy aquí para ayudarte, conversar y aprender contigo. ¿Qué necesitas hoy?
-            </div>
-            <div class="timestamp">Ahora</div>
-          </div>
+      const divEris = document.createElement('div');
+      divEris.className = 'mensaje eris';
+      divEris.innerHTML = `
+        <div class="avatar eris">🌙</div>
+        <div>
+          <div class="message-content">${html}</div>
+          <div class="timestamp">${getHora()}</div>
         </div>
       `;
-      localStorage.removeItem('erisHistorial');
-      cerrarModal();
+      chat.appendChild(divEris);
+      // TTS: speak text-only
+      speak(stripHtml(html));
     }
 
-    function mostrarInfo() {
-      document.getElementById('modalInfo').classList.add('active');
-    }
+    // --- Historial local ---
+    function guardarHistorial() { const chat = document.getElementById('chat'); localStorage.setItem('erisHistorial', chat.innerHTML); }
+    function cargarHistorial() { const historial = localStorage.getItem('erisHistorial'); if (historial) { document.getElementById('chat').innerHTML = historial; document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight; } }
 
-    function cerrarModal() {
-      document.querySelectorAll('.modal').forEach(modal => {
-        modal.classList.remove('active');
-      });
-    }
+    // --- Helpers ---
+    function escapeHtml(texto) { const map = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#039;"}; return String(texto).replace(/[&<>"']/g, m => map[m]); }
+    function stripHtml(html) { const d = document.createElement('div'); d.innerHTML = html; return d.textContent || d.innerText || ''; }
 
-    function guardarHistorial() {
-      const chat = document.getElementById('chat');
-      localStorage.setItem('erisHistorial', chat.innerHTML);
-    }
+    function confirmarLimpiar() { document.getElementById('modalConfirm').classList.add('active'); }
+    function limpiarChat() { const chat = document.getElementById('chat'); chat.innerHTML = `
+      <div class="mensaje eris">
+        <div class="avatar eris">🌙</div>
+        <div>
+          <div class="message-content">
+            Hola 👋 Soy Eris, tu asistente de IA. Estoy aquí para ayudarte, conversar y aprender contigo. ¿Qué necesitas hoy?
+          </div>
+          <div class="timestamp">Ahora</div>
+        </div>
+      </div>
+    `; localStorage.removeItem('erisHistorial'); cerrarModal(); }
 
-    function cargarHistorial() {
-      const historial = localStorage.getItem('erisHistorial');
-      if (historial) {
-        document.getElementById('chat').innerHTML = historial;
-        document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
-      }
-    }
+    function mostrarInfo() { document.getElementById('modalInfo').classList.add('active'); }
+    function cerrarModal() { document.querySelectorAll('.modal').forEach(m => m.classList.remove('active')); }
 
     // Cerrar modal al hacer clic fuera
     document.querySelectorAll('.modal').forEach(modal => {
-      modal.addEventListener('click', function(e) {
-        if (e.target === this) {
-          cerrarModal();
-        }
-      });
+      modal.addEventListener('click', function(e) { if (e.target === this) cerrarModal(); });
     });
-  </script>
 
+    // --- Reconocimiento y UI updates for recognition button placement fallback ---
+    // The sidebar "Hablar" button doesn't have an id in markup (for simplicity), update its text dynamically
+    function safeUpdateRecognitionButton() {
+      const buttons = document.querySelectorAll('.quick-btn');
+      for (const b of buttons) {
+        if (b.textContent.trim().includes('Hablar') || b.textContent.trim().includes('Parar')) { b.textContent = recognizing ? '🛑 Parar' : '🎤 Hablar'; break; }
+      }
+    }
+
+    // ensure UI updates when recognition toggles
+    setInterval(() => { try { safeUpdateRecognitionButton(); } catch(e){} }, 500);
+
+  </script>
 </body>
 </html>
