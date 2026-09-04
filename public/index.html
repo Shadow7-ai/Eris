@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eris - Asistente de IA Avanzada</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0f0715 0%, #1a0d2e 50%, #2d1b3d 100%);
+      color: #ffffff;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Fondo animado */
+    .background-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .floating-orb {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.1;
+      animation: float 20s infinite ease-in-out;
+    }
+
+    .orb1 {
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, #b46cff, transparent);
+      top: -100px;
+      left: -100px;
+      animation-duration: 25s;
+    }
+
+    .orb2 {
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, #00d4ff, transparent);
+      bottom: -150px;
+      right: -100px;
+      animation-duration: 30s;
+      animation-direction: reverse;
+    }
+
+    .orb3 {
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, #7d4fb8, transparent);
+      top: 50%;
+      right: 10%;
+      animation-duration: 20s;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0); }
+      25% { transform: translate(30px, -30px); }
+      50% { transform: translate(-30px, 30px); }
+      75% { transform: translate(30px, 30px); }
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+      max-width: 1400px;
+      margin: 0 auto;
+      gap: 20px;
+      padding: 20px;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 300px;
+      background: rgba(36, 23, 53, 0.6);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      border: 1px solid rgba(180, 108, 255, 0.2);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      overflow-y: auto;
+    }
+
+    .sidebar-header {
+      text-align: center;
+      border-bottom: 2px solid rgba(180, 108, 255, 0.3);
+      padding-bottom: 15px;
+    }
+
+    .logo {
+      font-size: 3rem;
+      margin-bottom: 10px;
+    }
+
+    .sidebar-header h2 {
+      color: #b46cff;
+      font-size: 1.5rem;
+      text-shadow: 0 0 15px rgba(180, 108, 255, 0.4);
+    }
+
+    .sidebar-header p {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.6);
+      margin-top: 5px;
+    }
+
+    .quick-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .quick-btn {
+      padding: 12px 16px;
+      background: rgba(180, 108, 255, 0.1);
+      border: 1px solid rgba(180, 108, 255, 0.3);
+      border-radius: 12px;
+      color: #b46cff;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      text-align: left;
+    }
+
+    .quick-btn:hover {
+      background: rgba(180, 108, 255, 0.2);
+      border-color: rgba(180, 108, 255, 0.6);
+      transform: translateX(5px);
+    }
+
+    .info-section {
+      background: rgba(180, 108, 255, 0.05);
+      border-radius: 12px;
+      padding: 15px;
+      border-left: 3px solid #b46cff;
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.7);
+      line-height: 1.6;
+    }
+
+    .memories-list {
+      background: rgba(255,255,255,0.03);
+      border-radius: 10px;
+      padding: 10px;
+      max-height: 180px;
+      overflow-y: auto;
+      font-size: 0.85rem;
+    }
+
+    .memory-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      margin-bottom: 6px;
+      background: rgba(0,0,0,0.15);
+    }
+
+    .memory-item small { opacity: 0.7; }
+
+    /* Main chat area */
+    .main-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: rgba(36, 23, 53, 0.4);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      border: 1px solid rgba(180, 108, 255, 0.2);
+      overflow: hidden;
+    }
+
+    .chat-header {
+      padding: 20px;
+      border-bottom: 2px solid rgba(180, 108, 255, 0.2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(135deg, rgba(180, 108, 255, 0.1), rgba(125, 79, 184, 0.05));
+    }
+
+    .chat-header h1 {
+      color: #b46cff;
+      font-size: 1.8rem;
+      text-shadow: 0 0 20px rgba(180, 108, 255, 0.5);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-indicator {
+      width: 12px;
+      height: 12px;
+      background: #00ff00;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .header-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .icon-btn {
+      background: rgba(180, 108, 255, 0.2);
+      border: 1px solid rgba(180, 108, 255, 0.4);
+      color: #b46cff;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .icon-btn:hover {
+      background: rgba(180, 108, 255, 0.4);
+      transform: scale(1.1);
+    }
+
+    /* Chat messages */
+    #chat {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    #chat::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    #chat::-webkit-scrollbar-track {
+      background: rgba(180, 108, 255, 0.05);
+      border-radius: 10px;
+    }
+
+    #chat::-webkit-scrollbar-thumb {
+      background: #b46cff;
+      border-radius: 10px;
+    }
+
+    #chat::-webkit-scrollbar-thumb:hover {
+      background: #c485ff;
+    }
+
+    .mensaje {
+      display: flex;
+      gap: 12px;
+      animation: slideIn 0.3s ease;
+      max-width: 85%;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .mensaje.usuario {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+      max-width: 80%;
+    }
+
+    .mensaje.eris {
+      align-self: flex-start;
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .avatar.eris {
+      background: linear-gradient(135deg, #b46cff, #7d4fb8);
+    }
+
+    .avatar.usuario {
+      background: linear-gradient(135deg, #00d4ff, #0099cc);
+    }
+
+    .message-content {
+      background: linear-gradient(135deg, #382449 0%, #4a2d5c 100%);
+      padding: 12px 16px;
+      border-radius: 15px;
+      border-left: 3px solid #b46cff;
+      word-wrap: break-word;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .mensaje.usuario .message-content {
+      background: linear-gradient(135deg, #6535a3 0%, #7d4fb8 100%);
+      border-left: none;
+      border-right: 3px solid #00d4ff;
+      text-align: right;
+    }
+
+    .timestamp {
+      font-size: 0.7rem;
+      opacity: 0.5;
+      margin-top: 6px;
+      text-align: left;
+    }
+
+    .mensaje.usuario .timestamp {
+      text-align: right;
+    }
+
+    /* Typing indicator */
+    .typing {
+      display: flex;
+      gap: 6px;
+      padding: 12px 16px;
+    }
+
+    .typing-dot {
+      width: 8px;
+      height: 8px;
+      background: #b46cff;
+      border-radius: 50%;
+      animation: typing 1.4s infinite;
+    }
+
+    .typing-dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .typing-dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes typing {
+      0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: 0.6;
+      }
+      30% {
+        transform: translateY(-10px);
+        opacity: 1;
+      }
+    }
+
+    /* Input area */
+    .input-area {
+      padding: 20px;
+      border-top: 2px solid rgba(180, 108, 255, 0.2);
+      background: linear-gradient(135deg, rgba(180, 108, 255, 0.05), rgba(125, 79, 184, 0.02));
+    }
+
+    .input-container {
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+    }
+
+    .input-wrapper {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      background: rgba(45, 27, 61, 0.8);
+      border: 2px solid rgba(180, 108, 255, 0.2);
+      border-radius: 12px;
+      padding: 0 12px;
+      transition: all 0.3s ease;
+    }
+
+    .input-wrapper:focus-within {
+      border-color: #b46cff;
+      box-shadow: 0 0 20px rgba(180, 108, 255, 0.3);
+      background: rgba(61, 43, 77, 0.8);
+    }
+
+    #mensaje {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 1rem;
+      padding: 12px 0;
+      outline: none;
+      resize: none;
+      max-height: 120px;
+      font-family: inherit;
+    }
+
+    #mensaje::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    .send-btn {
+      padding: 12px 28px;
+      background: linear-gradient(135deg, #b46cff 0%, #7d4fb8 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(180, 108, 255, 0.3);
+      white-space: nowrap;
+    }
+
+    .send-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(180, 108, 255, 0.5);
+    }
+
+    .send-btn:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .send-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Modales */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(5px);
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: linear-gradient(135deg, #1a0d2e, #2d1b3d);
+      border: 2px solid rgba(180, 108, 255, 0.3);
+      border-radius: 20px;
+      padding: 30px;
+      max-width: 500px;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content h2 {
+      color: #b46cff;
+      margin-bottom: 15px;
+      font-size: 1.8rem;
+    }
+
+    .modal-content p {
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+    }
+
+    .modal-buttons button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+
+    .btn-confirm {
+      background: #e74c3c;
+      color: white;
+    }
+
+    .btn-confirm:hover {
+      background: #c0392b;
+      transform: scale(1.05);
+    }
+
+    .btn-cancel {
+      background: rgba(180, 108, 255, 0.2);
+      color: #b46cff;
+      border: 1px solid #b46cff;
+    }
+
+    .btn-cancel:hover {
+      background: rgba(180, 108, 255, 0.3);
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .container {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .sidebar {
+        width: 100%;
+        max-height: 200px;
+      }
+
+      .main-area {
+        flex: 1;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 10px;
+      }
+
+      .sidebar {
+        display: none;
+      }
+
+      .mensaje {
+        max-width: 95%;
+      }
+
+      .chat-header h1 {
+        font-size: 1.4rem;
+      }
+
+      .input-container {
+        gap: 8px;
+      }
+
+      .send-btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="background-animation">
+    <div class="floating-orb orb1"></div>
+    <div class="floating-orb orb2"></div>
+    <div class="floating-orb orb3"></div>
+  </div>
+
+  <div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">🌙</div>
+        <h2>Eris</h2>
+        <p>Asistente de IA Avanzada</p>
+      </div>
+
+      <div class="quick-actions">
+        <button class="quick-btn" onclick="enviarComando('¿Quién eres?')">👤 Sobre mí</button>
+        <button class="quick-btn" onclick="enviarComando('Cuéntame un chiste')">😄 Chiste</button>
+        <button class="quick-btn" onclick="enviarComando('¿Qué puedes hacer?')">⚙️ Funciones</button>
+        <button class="quick-btn" onclick="enviarComando('Cómo estás?')">💜 Estado</button>
+      </div>
+
+      <div class="info-section">
+        <strong>ℹ️ Consejos:</strong><br>
+        • Presiona Enter para enviar<br>
+        • Usa Shift+Enter para nueva línea<br>
+        • Limpia el chat cuando lo necesites
+      </div>
+
+      <div>
+        <label style="font-size:0.9rem;color:rgba(255,255,255,0.8);">Voz:</label>
+        <select id="voiceSelect" style="width:100%;margin-top:6px;border-radius:8px;padding:8px;"></select>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button class="quick-btn" id="voiceToggle" style="flex:1;" onclick="toggleVoice()"><span id="voiceToggleLabel">🔈 Voz: ON</span></button>
+          <button class="quick-btn" style="flex:1;" onclick="toggleRecognition()">🎤 Hablar</button>
+        </div>
+      </div>
+
+      <div>
+        <label style="font-size:0.9rem;color:rgba(255,255,255,0.8);">Memorias guardadas</label>
+        <div class="memories-list" id="memoriesList"></div>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button class="quick-btn" style="flex:1;" onclick="abrirConfiguracion()">⚙️ Ajustes</button>
+          <button class="quick-btn" style="flex:1;" onclick="limpiarMemoriasUI()">🧹 Limpiar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Area principal -->
+    <div class="main-area">
+      <div class="chat-header">
+        <div>
+          <h1>
+            <span class="status-indicator"></span>
+            Eris
+          </h1>
+        </div>
+        <div class="header-buttons">
+          <button class="icon-btn" title="Informaci f3n" onclick="mostrarInfo()">ℹ️</button>
+          <button class="icon-btn" title="Limpiar chat" onclick="confirmarLimpiar()">🗑️</button>
+        </div>
+      </div>
+
+      <div id="chat">
+        <div class="mensaje eris">
+          <div class="avatar eris">🌙</div>
+          <div>
+            <div class="message-content">
+              Hola 👋 Soy Eris, tu asistente de IA. Estoy aquí para ayudarte, conversar y aprender contigo. ¿Qué necesitas hoy?
+            </div>
+            <div class="timestamp">Ahora</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="input-area">
+        <div class="input-container">
+          <div class="input-wrapper">
+            <textarea id="mensaje" placeholder="Escribe algo..." autocomplete="off"></textarea>
+          </div>
+          <button class="send-btn" id="btnEnviar" onclick="enviar()">Enviar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de confirmaci f3n -->
+  <div class="modal" id="modalConfirm">
+    <div class="modal-content">
+      <h2>⚠️ Limpiar Chat</h2>
+      <p>¿Estás seguro de que quieres eliminar todo el historial? Esta acci f3n no se puede deshacer.</p>
+      <div class="modal-buttons">
+        <button class="btn-confirm" onclick="limpiarChat()">Sí, limpiar</button>
+        <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de informaci f3n -->
+  <div class="modal" id="modalInfo">
+    <div class="modal-content">
+      <h2>ℹ️ Sobre Eris</h2>
+      <p>Soy Eris, una asistente de IA avanzada creada para conversar contigo de manera natural y ayudarte en lo que pueda.</p>
+      <p><strong>Funciones:</strong></p>
+      <p>✨ Conversación inteligente<br>🧠 Respuestas contextuales<br>💾 Historial persistente<br>🎨 Interfaz moderna<br>🔊 Texto a voz<br>🎤 Entrada por voz</p>
+      <div class="modal-buttons">
+        <button class="btn-cancel" onclick="cerrarModal()">Entendido</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal configuraci f3n (simple) -->
+  <div class="modal" id="modalSettings">
+    <div class="modal-content">
+      <h2>⚙️ Configuraci f3n de Eris</h2>
+      <label style="display:block;text-align:left;margin-bottom:8px;color:rgba(255,255,255,0.8)">Personalidad (sistema):</label>
+      <textarea id="systemPrompt" style="width:100%;height:120px;padding:10px;border-radius:8px;background:#1a0d2e;color:#fff;border:1px solid rgba(180,108,255,0.2)"></textarea>
+      <div style="margin-top:12px;display:flex;gap:10px;justify-content:center;">
+        <button class="btn-confirm" onclick="guardarConfiguracion()">Guardar</button>
+        <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Estado y configuraci f3n
+    const DEFAULT_SYSTEM_PROMPT = `Eres Eris, una asistente de IA en español. Tu estilo: amigable, conciso, un poco juguet f3n, profesional cuando se requiere. Responde en español, con ejemplos claros cuando sea útil.`;
+    let vozActiva = true;
+    let vozSeleccionada = null;
+    let recognition = null;
+    let recognizing = false;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      cargarHistorial();
+      initMemories();
+      cargarConfiguracion();
+      populateVoices();
+      setupRecognition();
+      if (typeof speechSynthesis !== 'undefined') {
+        speechSynthesis.onvoiceschanged = populateVoices;
+      }
+      renderMemoriesUI();
+    });
+
+    document.getElementById('mensaje').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        enviar();
+      }
+    });
+
+    function getHora() {
+      const now = new Date();
+      const horas = String(now.getHours()).padStart(2, '0');
+      const minutos = String(now.getMinutes()).padStart(2, '0');
+      return `${horas}:${minutos}`;
+    }
+
+    function enviarComando(comando) {
+      document.getElementById('mensaje').value = comando;
+      enviar();
+    }
+
+    // --- Memorias (localStorage) ---
+    function initMemories() {
+      if (!localStorage.getItem('erisMemory')) {
+        localStorage.setItem('erisMemory', JSON.stringify([]));
+      }
+    }
+
+    function obtenerMemorias() {
+      try {
+        return JSON.parse(localStorage.getItem('erisMemory') || '[]');
+      } catch { return []; }
+    }
+
+    function agregarMemoria(texto) {
+      const mem = obtenerMemorias();
+      mem.push({ id: Date.now(), text: texto, createdAt: new Date().toISOString() });
+      localStorage.setItem('erisMemory', JSON.stringify(mem));
+      renderMemoriesUI();
+    }
+
+    function borrarMemoria(id) {
+      const mem = obtenerMemorias().filter(m => m.id !== id);
+      localStorage.setItem('erisMemory', JSON.stringify(mem));
+      renderMemoriesUI();
+    }
+
+    function limpiarMemorias() {
+      localStorage.setItem('erisMemory', JSON.stringify([]));
+      renderMemoriesUI();
+    }
+
+    function renderMemoriesUI() {
+      const list = document.getElementById('memoriesList');
+      const mems = obtenerMemorias();
+      if (!list) return;
+      if (mems.length === 0) {
+        list.innerHTML = `<div style="opacity:0.7;padding:8px">(Sin memorias guardadas)</div>`;
+        return;
+      }
+      list.innerHTML = '';
+      mems.slice().reverse().forEach(m => {
+        const div = document.createElement('div');
+        div.className = 'memory-item';
+        div.innerHTML = `<div style="flex:1"><small>${new Date(m.createdAt).toLocaleString()}</small><div>${escapeHtml(m.text)}</div></div><div style="flex-shrink:0"><button style="background:transparent;border:1px solid rgba(180,108,255,0.2);color:#b46cff;border-radius:8px;padding:6px;" onclick="borrarMemoria(${m.id})">🗑️</button></div>`;
+        list.appendChild(div);
+      });
+    }
+
+    function limpiarMemoriasUI() {
+      if (!confirm('¿Eliminar todas las memorias?')) return;
+      limpiarMemorias();
+      appendSystemMessage('Memorias eliminadas.');
+    }
+
+    // --- Configuración ---
+    function cargarConfiguracion() {
+      const sp = localStorage.getItem('erisSystemPrompt') || DEFAULT_SYSTEM_PROMPT;
+      document.getElementById('systemPrompt').value = sp;
+    }
+    function guardarConfiguracion() {
+      const sp = document.getElementById('systemPrompt').value || DEFAULT_SYSTEM_PROMPT;
+      localStorage.setItem('erisSystemPrompt', sp);
+      cerrarModal();
+      alert('Configuración guardada.');
+    }
+    function abrirConfiguracion() { document.getElementById('modalSettings').classList.add('active'); }
+
+    // --- Voz (TTS) ---
+    function populateVoices() {
+      const select = document.getElementById('voiceSelect');
+      select.innerHTML = '';
+      if (!('speechSynthesis' in window)) {
+        const opt = document.createElement('option'); opt.textContent = 'No disponible'; select.appendChild(opt); return;
+      }
+      const voices = speechSynthesis.getVoices();
+      voices.forEach((v, i) => {
+        const opt = document.createElement('option'); opt.value = i; opt.textContent = `${v.name} (${v.lang})${v.default? ' — default':''}`; select.appendChild(opt);
+      });
+      if (voices.length > 0) { select.selectedIndex = 0; vozSeleccionada = voices[0]; }
+      select.addEventListener('change', () => { const v = speechSynthesis.getVoices()[select.value]; if (v) vozSeleccionada = v; });
+    }
+
+    function toggleVoice() {
+      vozActiva = !vozActiva;
+      document.getElementById('voiceToggleLabel').textContent = vozActiva ? '🔈 Voz: ON' : '🔇 Voz: OFF';
+    }
+
+    function speak(text) {
+      if (!vozActiva || !('speechSynthesis' in window)) return;
+      const utter = new SpeechSynthesisUtterance(text);
+      if (vozSeleccionada) utter.voice = vozSeleccionada;
+      utter.lang = vozSeleccionada?.lang || 'es-ES';
+      utter.rate = 1; utter.pitch = 1;
+      speechSynthesis.cancel();
+      speechSynthesis.speak(utter);
+    }
+
+    // --- Reconocimiento de voz (entrada) ---
+    function setupRecognition() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+      if (!SpeechRecognition) return;
+      recognition = new SpeechRecognition();
+      recognition.lang = 'es-ES';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.addEventListener('result', (e) => {
+        const text = e.results[0][0].transcript;
+        const textarea = document.getElementById('mensaje');
+        textarea.value = textarea.value ? textarea.value + ' ' + text : text;
+      });
+      recognition.addEventListener('end', () => { recognizing = false; updateRecognitionUI(); });
+      recognition.addEventListener('error', (e) => { console.error('Recognition error', e); recognizing = false; updateRecognitionUI(); });
+    }
+
+    function toggleRecognition() {
+      if (!recognition) { alert('Reconocimiento de voz no soportado en este navegador'); return; }
+      if (recognizing) { recognition.stop(); recognizing = false; updateRecognitionUI(); }
+      else { recognition.start(); recognizing = true; updateRecognitionUI(); }
+    }
+
+    function updateRecognitionUI() {
+      const btns = document.querySelectorAll('.quick-btn');
+      // Visual cue: change first "Hablar" button text
+      // (we don't have unique id for that button, rely on its innerText)
+      const talkBtn = Array.from(btns).find(b => b.textContent.includes('Hablar') || b.textContent.includes('Hablar'));
+      if (talkBtn) talkBtn.textContent = recognizing ? '🛑 Parar' : '🎤 Hablar';
+    }
+
+    // --- Envío y lógica de Eris (local rápido) ---
+    function enviar() {
+      const input = document.getElementById('mensaje');
+      const chat = document.getElementById('chat');
+      const btnEnviar = document.getElementById('btnEnviar');
+      const texto = input.value.trim();
+      if (texto === '') return;
+
+      // Mostrar mensaje del usuario
+      const divUsuario = document.createElement('div');
+      divUsuario.className = 'mensaje usuario';
+      divUsuario.innerHTML = `
+        <div>
+          <div class="message-content">${escapeHtml(texto)}</div>
+          <div class="timestamp">${getHora()}</div>
+        </div>
+        <div class="avatar usuario">👤</div>
+      `;
+      chat.appendChild(divUsuario);
+      chat.scrollTop = chat.scrollHeight;
+
+      input.value = '';
+
+      // Ver si es comando para memorizar
+      const memMatch = texto.match(/^(?:recuerda|recorda|acuerda|guarda) que (.+)/i);
+      if (memMatch) {
+        agregarMemoria(memMatch[1].trim());
+        appendAssistantMessage(`He guardado eso en mi memoria: "${escapeHtml(memMatch[1].trim())}"`);
+        guardarHistorial();
+        return;
+      }
+
+      // Comando para mostrar memorias
+      if (/mostrar memorias|mis memorias|ver memorias/i.test(texto)) {
+        const mems = obtenerMemorias();
+        if (mems.length === 0) { appendAssistantMessage('No tengo memorias guardadas.'); }
+        else { appendAssistantMessage('Estas son mis memorias importantes:'); mems.forEach(m => appendAssistantMessage(`- ${m.text} (${new Date(m.createdAt).toLocaleDateString()})`)); }
+        guardarHistorial();
+        return;
+      }
+
+      // Mostrar indicador de escritura
+      const divTyping = document.createElement('div');
+      divTyping.className = 'mensaje eris';
+      divTyping.id = 'typing';
+      divTyping.innerHTML = `
+        <div class="avatar eris">🌙</div>
+        <div>
+          <div class="message-content typing">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+          </div>
+        </div>
+      `;
+      chat.appendChild(divTyping);
+      chat.scrollTop = chat.scrollHeight;
+
+      btnEnviar.disabled = true; input.disabled = true;
+
+      // Responder localmente con pequeño delay para simular naturalidad
+      setTimeout(() => {
+        if (divTyping.parentNode) divTyping.parentNode.removeChild(divTyping);
+        const reply = generarRespuestaLocal(texto);
+        appendAssistantMessage(reply);
+        btnEnviar.disabled = false; input.disabled = false; input.focus();
+        chat.scrollTop = chat.scrollHeight; guardarHistorial();
+      }, 700 + Math.random()*800);
+    }
+
+    function generarRespuestaLocal(texto) {
+      // Convertir a minúsculas para matching
+      const t = texto.toLowerCase();
+      const mems = obtenerMemorias();
+
+      // Si pregunta por una memoria específica: "¿qué recuerdo sobre X?" o "¿recuerdas X?"
+      for (const m of mems) {
+        if (t.includes(m.text.toLowerCase().split(' ')[0])) { // simple heuristic: check first word
+          return `Recuerdo: ${m.text}`;
+        }
+      }
+
+      // Respuestas básicas (extendido de tu lógica)
+      if (/hola|hey|buenos días|buenas noches|buenas tardes|ey/.test(t)) {
+        return elegir(["¡Hola! 😄 ¿Cómo estás hoy?","¡Hola! Encantada de ayudarte 💜","Hola 👋 ¿Qué necesitas?"]);
+      }
+      if (/quién eres|que eres|cual es tu nombre|tu nombre|cuál es tu nombre/.test(t)) {
+        return "Soy Eris, una asistente de IA creada para conversar contigo y ayudarte en lo que pueda. Estoy aquí para ser tu compañera digital 🌙💜";
+      }
+      if (/cómo estás|como estas|que tal/.test(t)) {
+        return elegir(["Estoy funcionando perfectamente ✨ Gracias por preguntar","Excelente, gracias por tu interés 😊","Al 100% y lista para ayudarte 🚀"]);
+      }
+      if (/gracias|thx|thanks|tq|muy amable/.test(t)) {
+        return "De nada 😄 Siempre es un placer ayudarte. ¿Hay algo más en lo que pueda asistirte?";
+      }
+      if (/adiós|adios|bye|chao|hasta luego/.test(t)) {
+        return "¡Hasta luego! Que tengas un excelente día 🌟 Vuelve cuando quieras conversar.";
+      }
+      if (/chiste|cuéntame un chiste|algo divertido/.test(t)) {
+        return elegir([
+          "¿Por qué los programadores usan Linux? Porque no tienen Windows 😄",
+          "Un SQL caminaba a un bar, vio una tabla y una silla... se sentó. 🍺",
+          "¿Cuántos programadores se necesitan para cambiar un foco? Ninguno, eso es hardware 💡"
+        ]);
+      }
+
+      // If no rule matches, return a friendly default that references personality
+      const system = localStorage.getItem('erisSystemPrompt') || DEFAULT_SYSTEM_PROMPT;
+      return `${elegir(["Interesante pregunta — todavía estoy aprendiendo sobre eso 🤔","Esa pregunta está un poco fuera de mis conocimientos actuales, pero me gustaría aprender más 📚","Creo que necesito mejorar mi comprensión al respecto. ¿Podrías explicarme un poco más? 💭"])} (${system.split('.')[0]})`;
+    }
+
+    function elegir(arr) { return arr[Math.floor(Math.random()*arr.length)]; }
+
+    function appendAssistantMessage(html) {
+      const chat = document.getElementById('chat');
+      const divEris = document.createElement('div');
+      divEris.className = 'mensaje eris';
+      divEris.innerHTML = `
+        <div class="avatar eris">🌙</div>
+        <div>
+          <div class="message-content">${html}</div>
+          <div class="timestamp">${getHora()}</div>
+        </div>
+      `;
+      chat.appendChild(divEris);
+      // TTS: speak text-only
+      speak(stripHtml(html));
+    }
+
+    // --- Historial local ---
+    function guardarHistorial() { const chat = document.getElementById('chat'); localStorage.setItem('erisHistorial', chat.innerHTML); }
+    function cargarHistorial() { const historial = localStorage.getItem('erisHistorial'); if (historial) { document.getElementById('chat').innerHTML = historial; document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight; } }
+
+    // --- Helpers ---
+    function escapeHtml(texto) { const map = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#039;"}; return String(texto).replace(/[&<>"']/g, m => map[m]); }
+    function stripHtml(html) { const d = document.createElement('div'); d.innerHTML = html; return d.textContent || d.innerText || ''; }
+
+    function confirmarLimpiar() { document.getElementById('modalConfirm').classList.add('active'); }
+    function limpiarChat() { const chat = document.getElementById('chat'); chat.innerHTML = `
+      <div class="mensaje eris">
+        <div class="avatar eris">🌙</div>
+        <div>
+          <div class="message-content">
+            Hola 👋 Soy Eris, tu asistente de IA. Estoy aquí para ayudarte, conversar y aprender contigo. ¿Qué necesitas hoy?
+          </div>
+          <div class="timestamp">Ahora</div>
+        </div>
+      </div>
+    `; localStorage.removeItem('erisHistorial'); cerrarModal(); }
+
+    function mostrarInfo() { document.getElementById('modalInfo').classList.add('active'); }
+    function cerrarModal() { document.querySelectorAll('.modal').forEach(m => m.classList.remove('active')); }
+
+    // Cerrar modal al hacer clic fuera
+    document.querySelectorAll('.modal').forEach(modal => {
+      modal.addEventListener('click', function(e) { if (e.target === this) cerrarModal(); });
+    });
+
+    // --- Reconocimiento y UI updates for recognition button placement fallback ---
+    // The sidebar "Hablar" button doesn't have an id in markup (for simplicity), update its text dynamically
+    function safeUpdateRecognitionButton() {
+      const buttons = document.querySelectorAll('.quick-btn');
+      for (const b of buttons) {
+        if (b.textContent.trim().includes('Hablar') || b.textContent.trim().includes('Parar')) { b.textContent = recognizing ? '🛑 Parar' : '🎤 Hablar'; break; }
+      }
+    }
+
+    // ensure UI updates when recognition toggles
+    setInterval(() => { try { safeUpdateRecognitionButton(); } catch(e){} }, 500);
+
+  </script>
+</body>
+</html>
