@@ -9,7 +9,8 @@ const port = process.env.PORT || 3000;
 const MEM_FILE = path.join(__dirname, 'memories.json');
 
 app.use(express.json());
-app.use(express.static('public'));
+// Serve static files from the repo root so index.html at project root is served
+app.use(express.static(path.join(__dirname)));
 
 async function loadMemories() {
   try {
