@@ -3,212 +3,98 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Eris — Voice Demo (TTS + STT)</title>
-  <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;max-width:900px;margin:36px auto;color:#0f172a}
-    header{display:flex;align-items:center;gap:12px}
-    h1{margin:0;font-size:20px}
-    section{background:#fff;border:1px solid #e6eef8;padding:18px;border-radius:8px;margin-top:18px}
-    label{display:block;margin-top:12px;font-weight:600}
-    textarea{width:100%;min-height:120px;padding:10px;border-radius:6px;border:1px solid #cbd5e1}
-    .row{display:flex;gap:10px;align-items:center;margin-top:10px}
-    button{background:#0ea5e9;border:none;color:white;padding:8px 12px;border-radius:6px;cursor:pointer}
-    button.secondary{background:#64748b}
-    .muted{color:#475569;font-size:13px}
-    .notice{background:#fffbeb;border:1px solid #fef3c7;padding:10px;border-radius:6px;margin-top:12px}
-    footer{margin-top:18px;color:#64748b;font-size:13px}
-  </style>
+  <title>Eris — Voice Demo (TTS + STT) - Improved</title>
+  <link rel="stylesheet" href="./assets/css/voice.css">
 </head>
 <body>
-  <header>
-    <h1>Eris — Voice demo (Text-to-Speech & Speech-to-Text)</h1>
-  </header>
+  <main class="container" role="main">
+    <header class="header">
+      <h1 id="title">Eris — Demo de voz</h1>
+      <div class="controls-top">
+        <label class="inline" for="uiLang">UI:</label>
+        <select id="uiLang" aria-label="Idioma de la interfaz">
+          <option value="es">Español</option>
+          <option value="en">English</option>
+        </select>
+        <a id="link-gh" href="https://github.com/Shadow7-ai/Eris" target="_blank" rel="noopener" aria-label="Repositorio Eris">Repo</a>
+      </div>
+    </header>
 
-  <section>
-    <p class="muted">Prueba la nueva función de voz: habla y escucha. Este demo usa la Web Speech API (SpeechSynthesis y SpeechRecognition). Funciona mejor en Chrome/Edge para STT; TTS tiene soporte amplio.</p>
+    <section class="card">
+      <h2 id="ttsTitle">Text-to-Speech (TTS)</h2>
+      <label for="ttsText" id="ttsTextLabel">Texto a reproducir</label>
+      <textarea id="ttsText">Hola, esto es una prueba de la función de voz en Eris.</textarea>
 
-    <h3>Text-to-Speech (TTS)</h3>
-    <label for="ttsText">Texto a reproducir</label>
-    <textarea id="ttsText">Hola, esto es una prueba de la función de voz en Eris.</textarea>
+      <div class="row">
+        <div class="field">
+          <label for="voiceSearch" id="voiceSearchLabel">Buscar voz</label>
+          <input id="voiceSearch" placeholder="buscar..." />
+          <select id="voiceSelect" size="4" aria-label="Seleccionar voz"></select>
+        </div>
 
-    <div class="row">
-      <label for="voiceSelect">Voz:</label>
-      <select id="voiceSelect"></select>
-      <label for="rate">Velocidad</label>
-      <input id="rate" type="range" min="0.5" max="2" step="0.1" value="1" />
-      <label for="pitch">Pitch</label>
-      <input id="pitch" type="range" min="0" max="2" step="0.1" value="1" />
-    </div>
+        <div class="field params">
+          <label for="rate">Rate <span id="rateVal">1</span></label>
+          <input id="rate" type="range" min="0.5" max="2" step="0.1" value="1" />
 
-    <div class="row">
-      <button id="speakBtn">Reproducir</button>
-      <button id="stopBtn" class="secondary">Detener</button>
-    </div>
+          <label for="pitch">Pitch <span id="pitchVal">1</span></label>
+          <input id="pitch" type="range" min="0" max="2" step="0.1" value="1" />
 
-    <div id="ttsSupport" class="notice" style="display:none"></div>
+          <div class="row small">
+            <button id="speakBtn">Reproducir</button>
+            <button id="stopBtn" class="secondary">Detener</button>
+          </div>
+        </div>
+      </div>
 
-    <h3 style="margin-top:18px">Speech-to-Text (STT)</h3>
-    <p class="muted">Pulsa <strong>Iniciar</strong> y habla. Pulsa <strong>Detener</strong> cuando acabes. La transcripción aparecerá abajo.</p>
+      <div id="ttsNotice" class="notice" hidden></div>
+    </section>
 
-    <div class="row">
-      <button id="startRec">Iniciar</button>
-      <button id="stopRec" class="secondary" disabled>Detener</button>
-      <label for="langSelect">Idioma:</label>
-      <select id="langSelect">
-        <option value="es-ES">Español (España)</option>
-        <option value="es-US">Español (LatAm)</option>
-        <option value="en-US">English (US)</option>
-      </select>
-    </div>
+    <section class="card">
+      <h2 id="sttTitle">Speech-to-Text (STT)</h2>
+      <p id="sttDesc">Pulsa <strong>Iniciar</strong> y habla. Pulsa <strong>Detener</strong> cuando acabes.</p>
 
-    <label for="transcript">Transcripción</label>
-    <textarea id="transcript" readonly placeholder="La transcripción aparecerá aquí..."></textarea>
+      <div class="row">
+        <div class="field">
+          <label for="langSelect">Idioma</label>
+          <select id="langSelect">
+            <option value="es-ES">Español (ES)</option>
+            <option value="es-US">Español (LatAm)</option>
+            <option value="en-US">English (US)</option>
+          </select>
+        </div>
 
-    <div id="sttSupport" class="notice" style="display:none"></div>
+        <div class="field">
+          <button id="startRec">Iniciar</button>
+          <button id="stopRec" class="secondary" disabled>Detener</button>
+          <button id="acceptRec" class="secondary" disabled>Aceptar</button>
+          <button id="downloadRec" class="secondary" disabled>Descargar (wav)</button>
+        </div>
+      </div>
 
-    <footer>
-      <p>Instrucciones: Si tu navegador no soporta recognition, STT no funcionará. En Chrome/Edge habilita permisos de micrófono. Guarda/usa este archivo en GitHub Pages (carpeta docs/) para probar fácilmente.</p>
+      <label for="transcript">Transcripción</label>
+      <textarea id="transcript" readonly placeholder="La transcripción aparecerá aquí..."></textarea>
+
+      <div class="vu-meter" aria-hidden="true">
+        <div id="vuLevel" class="vu-fill"></div>
+      </div>
+
+      <div id="sttNotice" class="notice" hidden></div>
+    </section>
+
+    <section class="card small">
+      <h3 id="notesTitle">Notas</h3>
+      <ul id="notesList">
+        <li>Mejor soporte STT en Chrome/Edge. Permite micrófono en la página.</li>
+        <li>TTS usa SpeechSynthesis: voces dependen del sistema y navegador.</li>
+        <li>Descarga disponible para grabaciones (no para voces sintetizadas por limitaciones del API del navegador).</li>
+      </ul>
+    </section>
+
+    <footer class="footer">
+      <small id="footerTxt">Eris — Voice demo • Mejoras en rama feat/voice-demo-improvements</small>
     </footer>
-  </section>
+  </main>
 
-  <script>
-    // --- TTS setup ---
-    const ttsText = document.getElementById('ttsText');
-    const voiceSelect = document.getElementById('voiceSelect');
-    const rateInput = document.getElementById('rate');
-    const pitchInput = document.getElementById('pitch');
-    const speakBtn = document.getElementById('speakBtn');
-    const stopBtn = document.getElementById('stopBtn');
-    const ttsSupport = document.getElementById('ttsSupport');
-
-    function populateVoices() {
-      const voices = speechSynthesis.getVoices();
-      voiceSelect.innerHTML = '';
-      voices.forEach(v => {
-        const opt = document.createElement('option');
-        opt.value = v.name + '|' + v.lang;
-        opt.textContent = `${v.name} — ${v.lang}${v.default ? ' (default)' : ''}`;
-        voiceSelect.appendChild(opt);
-      });
-    }
-
-    if ('speechSynthesis' in window) {
-      ttsSupport.style.display = 'none';
-      populateVoices();
-      // Some browsers load voices asynchronously
-      if (speechSynthesis.onvoiceschanged !== undefined) {
-        speechSynthesis.onvoiceschanged = populateVoices;
-      }
-    } else {
-      ttsSupport.style.display = 'block';
-      ttsSupport.textContent = 'Tu navegador NO soporta Text-to-Speech (speechSynthesis). Prueba en Chrome, Edge o Firefox (con limitaciones).';
-      speakBtn.disabled = true;
-    }
-
-    function speak() {
-      if (!('speechSynthesis' in window)) return;
-      speechSynthesis.cancel();
-      const text = ttsText.value;
-      if (!text.trim()) return;
-      const utter = new SpeechSynthesisUtterance(text);
-      const sel = voiceSelect.value;
-      if (sel) {
-        const [name, lang] = sel.split('|');
-        const voices = speechSynthesis.getVoices();
-        const match = voices.find(v => v.name === name && v.lang === lang);
-        if (match) utter.voice = match;
-      }
-      utter.rate = parseFloat(rateInput.value);
-      utter.pitch = parseFloat(pitchInput.value);
-      speechSynthesis.speak(utter);
-    }
-
-    speakBtn.addEventListener('click', speak);
-    stopBtn.addEventListener('click', () => speechSynthesis.cancel());
-
-    // --- STT setup ---
-    const startRec = document.getElementById('startRec');
-    const stopRec = document.getElementById('stopRec');
-    const transcript = document.getElementById('transcript');
-    const sttSupport = document.getElementById('sttSupport');
-    const langSelect = document.getElementById('langSelect');
-
-    let recognition = null;
-    let recognizing = false;
-
-    function setupRecognition() {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRecognition) {
-        sttSupport.style.display = 'block';
-        sttSupport.textContent = 'Tu navegador NO soporta Speech-to-Text (SpeechRecognition). Usa Chrome o Edge en escritorio móvil/desktop con permiso de micrófono.';
-        startRec.disabled = true;
-        return;
-      }
-      recognition = new SpeechRecognition();
-      recognition.continuous = true; // keep listening
-      recognition.interimResults = true; // show partial results
-      recognition.lang = langSelect.value || 'es-ES';
-
-      recognition.onstart = () => {
-        recognizing = true;
-        startRec.disabled = true;
-        stopRec.disabled = false;
-      };
-      recognition.onend = () => {
-        recognizing = false;
-        startRec.disabled = false;
-        stopRec.disabled = true;
-      };
-
-      let finalTranscript = '';
-
-      recognition.onresult = (event) => {
-        let interim = '';
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          const res = event.results[i];
-          if (res.isFinal) finalTranscript += res[0].transcript;
-          else interim += res[0].transcript;
-        }
-        transcript.value = (finalTranscript + '\n' + interim).trim();
-      };
-
-      recognition.onerror = (e) => {
-        console.error('Recognition error', e);
-      };
-    }
-
-    setupRecognition();
-
-    langSelect.addEventListener('change', () => {
-      if (recognition) recognition.lang = langSelect.value;
-    });
-
-    startRec.addEventListener('click', async () => {
-      if (!recognition) {
-        setupRecognition();
-        if (!recognition) return;
-      }
-      try {
-        // Ensure microphone permission
-        await navigator.mediaDevices.getUserMedia({ audio: true });
-      } catch (err) {
-        sttSupport.style.display = 'block';
-        sttSupport.textContent = 'Permiso de micrófono denegado o no disponible.';
-        return;
-      }
-      transcript.value = '';
-      recognition.start();
-    });
-
-    stopRec.addEventListener('click', () => {
-      if (recognition && recognizing) recognition.stop();
-    });
-
-    // Small UX: keyboard shortcut to speak (Ctrl+Enter)
-    ttsText.addEventListener('keydown', (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') speak();
-    });
-
-  </script>
+  <script src="./assets/js/voice.js" defer></script>
 </body>
 </html>
